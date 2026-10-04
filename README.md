@@ -17,7 +17,9 @@ Spider dev 세트 전체(1,034문제, DB 20개)의 실행 정확도(Execution Ac
 |---|---|---|---|---|
 | Qwen2.5-Coder-3B | zero-shot | 61.8% | 13.4% | 5.52s |
 | Qwen2.5-Coder-3B | + 예시 행 3개 | - | - | - |
-| Qwen2.5-Coder-3B | QLoRA 파인튜닝 | **73.4%** | **6.1%** | **5.04s** |
+| Qwen2.5-Coder-3B | QLoRA 파인튜닝 | 73.4% | 6.1% | 5.04s |
+| Qwen2.5-Coder-3B | zero-shot + self-correction | 62.6% | 10.3% | 7.57s |
+| Qwen2.5-Coder-3B | QLoRA 파인튜닝 + self-correction | **74.4%** | **3.6%** | 5.97s |
 
 ### 파인튜닝 전후 비교
 
@@ -51,6 +53,21 @@ Spider dev 세트 전체(1,034문제, DB 20개)의 실행 정확도(Execution Ac
 - 참고로, 이 평가는 컬럼 순서까지 비교하는 엄격한 방식입니다. 행 값은 같고 컬럼 순서만 다른 오답이 베이스라인 39건, 파인튜닝 32건으로 비슷해서, 이 방식이 비교 결과를 한쪽으로 치우치게 하지는 않습니다.
 
 상세 비교는 `python scripts/compare.py outputs/preds_base-3b_eval.jsonl outputs/preds_ft-3b_eval.jsonl`로 재현할 수 있습니다.
+
+### Self-correction 실험
+
+실행 오류가 난 SQL만 SQLite 오류 메시지와 함께 모델에 다시 보여 주고 고치게 했습니다 (최대 2회). 정답 SQL은 쓰지 않으므로 실제 서비스에서도 같은 효과를 기대할 수 있습니다.
+
+| | 재시도한 문제 | 실행 성공으로 바뀜 | 그중 정답 | EX 변화 | 평균 지연 변화 |
+|---|---|---|---|---|---|
+| zero-shot | 139 | 33 | 8 | +0.8%p | +2.05s |
+| 파인튜닝 | 63 | 26 | 10 | +1.0%p | +0.93s |
+
+- 실행 오류는 크게 줄었지만(파인튜닝 6.1% → 3.6%) **정답률 상승은 1%p 안팎**에 그쳤습니다. 오류만 없앤 SQL의 60% 이상은 여전히 답이 틀렸습니다.
+- **잘 고친 경우는 이름을 살짝 틀린 경우**입니다. 예: `pet_type` → `pettype`, 별칭 `T2.PetType` → `T1.PetType`, 모호한 `PetID` → `T2.PetID`.
+- **가장 큰 한계는 "같은 SQL 반복"**입니다. temperature 0에서 오류 메시지를 줘도 직전 SQL을 그대로 다시 쓴 경우가 zero-shot 65%(91/139), 파인튜닝 40%(25/63)였습니다. 없는 `song` 테이블처럼 잘못된 생각에서 출발한 SQL은 거의 고치지 못했습니다.
+- 2번째 시도는 거의 도움이 되지 않았습니다. 성공의 대부분(파인튜닝 26건 중 24건)이 1번째 시도에서 나왔습니다.
+- 개선 아이디어: 오류가 난 테이블의 실제 컬럼 목록을 힌트로 함께 주기, 재시도에서는 temperature를 올려 다른 답을 유도하기, 오류 수정 대화를 학습 데이터에 포함하기.
 
 ### 베이스라인 오류 분석 (zero-shot)
 
@@ -93,11 +110,13 @@ src/text2sql/
   executor.py    안전한 SQL 실행 (읽기 전용 + authorizer + 타임아웃)
   evaluate.py    실행 정확도 계산
   llm.py         Ollama 클라이언트
+  correct.py     self-correction (실행 오류 메시지로 SQL 재작성)
 scripts/
   prepare_spider.py   Spider → chat 형식 JSONL
   predict.py          모델로 dev 세트 SQL 생성 (중단 후 이어서 실행 가능)
   evaluate.py         정확도·오류율·지연시간 집계
   compare.py          두 모델 결과 비교 (유형별·DB별·좋아진/나빠진 사례)
+  self_correct.py     실행 오류가 난 SQL만 오류 메시지와 함께 다시 고치기
   plot_loss.py        Colab 학습 로그 → Loss 그래프 (pip install -e ".[plot]")
 train/finetune_unsloth.py   Colab T4용 QLoRA 학습 → GGUF 변환
 app/main.py                 FastAPI 서버 (/query, /schema, /databases)
@@ -159,5 +178,6 @@ uvicorn app.main:app --reload
 - [x] QLoRA 파인튜닝 및 비교
 - [x] 오류 분석: JOIN·GROUP BY·중첩 쿼리 등 유형별 실패 사례 정리
 - [ ] **한국어 확장**: 가상 쇼핑몰 DB + 직접 만든 한국어 질문 평가셋(100개 이상)
-- [ ] 실행 오류 시 에러 메시지를 모델에 다시 주는 self-correction 루프
+- [x] 실행 오류 시 에러 메시지를 모델에 다시 주는 self-correction 루프
+- [ ] self-correction 개선: 컬럼 목록 힌트, 재시도 temperature
 - [ ] 웹 UI, Docker Compose
