@@ -12,10 +12,11 @@
 ## 결과
 
 Spider dev 세트 실행 정확도(Execution Accuracy)입니다. 실험을 진행하면서 채웁니다.
+현재 수치는 dev 앞 200문제(DB 4개: car_1, concert_singer, pets_1, flight_2) 기준입니다.
 
 | 모델 | 방식 | EX | SQL 오류율 | 평균 지연(CPU) |
 |---|---|---|---|---|
-| Qwen2.5-Coder-3B | zero-shot | - | - | - |
+| Qwen2.5-Coder-3B | zero-shot | 49.5% | 28.0% | 6.43s |
 | Qwen2.5-Coder-3B | + 예시 행 3개 | - | - | - |
 | Qwen2.5-Coder-3B | QLoRA 파인튜닝 | - | - | - |
 

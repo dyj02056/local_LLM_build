@@ -1,13 +1,22 @@
 # Google Colab(T4 GPU)용 QLoRA 파인튜닝 스크립트.
 # 셀 단위(# %%)로 나눠 두었으니 Colab에 셀별로 복사해 실행하세요.
 # 준비물: 로컬에서 만든 data/sft/train.jsonl 을 Colab의 같은 경로(/content/data/sft/)에 업로드.
-# Colab 파일은 런타임이 끊기면 사라지므로 결과물은 마지막 셀에서 Google Drive로 복사한다.
+# Colab 파일은 런타임이 끊기면 사라지므로 결과물은 단계마다 Google Drive로 복사한다.
 # Unsloth/TRL 버전에 따라 인자명이 바뀔 수 있으니 오류가 나면 Unsloth 공식 노트북을 참고하세요.
 
-# %% 설치
+# %% 0. GPU 확인 (Tesla T4가 보여야 함)
+# !nvidia-smi
+
+# %% 1. 설치
 # !pip install unsloth
 
-# %% 모델 로드 (4bit)
+# %% 2. Google Drive 연결 (결과물 백업용)
+from google.colab import drive
+
+drive.mount("/content/drive")
+BACKUP_DIR = "/content/drive/MyDrive/text2sql"
+
+# %% 3. 모델 로드 (4bit)
 from unsloth import FastLanguageModel
 
 MODEL_NAME = "unsloth/Qwen2.5-Coder-3B-Instruct"  # 7B로 바꾸면 성능↑, 로컬 추론 속도↓
@@ -29,7 +38,7 @@ model = FastLanguageModel.get_peft_model(
     random_state=3407,
 )
 
-# %% 데이터 (prompt.py와 동일한 chat 형식)
+# %% 4. 데이터 (prompt.py와 동일한 chat 형식)
 from datasets import load_dataset
 
 ds = load_dataset("json", data_files="data/sft/train.jsonl", split="train")
@@ -38,7 +47,7 @@ ds = ds.map(lambda ex: {"text": tokenizer.apply_chat_template(ex["messages"], to
 ds = ds.filter(lambda ex: len(tokenizer(ex["text"]).input_ids) <= MAX_SEQ_LEN)
 print(ds)
 
-# %% 학습 (T4는 bf16 미지원 → fp16)
+# %% 5. 학습 (T4는 bf16 미지원 → fp16)
 from trl import SFTConfig, SFTTrainer
 from unsloth.chat_templates import train_on_responses_only
 
@@ -70,17 +79,15 @@ trainer = train_on_responses_only(
 )
 trainer.train()
 
-# %% 저장: LoRA 어댑터 + Ollama용 GGUF
-model.save_pretrained("lora_adapter")
-tokenizer.save_pretrained("lora_adapter")
-model.save_pretrained_gguf("gguf_out", tokenizer, quantization_method="q4_k_m")
-
-# %% 결과물을 Google Drive에 백업 (런타임이 끊겨도 보존)
-from google.colab import drive
+# %% 6. LoRA 어댑터 저장 + Drive 백업 (GGUF 변환이 실패해도 학습 결과는 보존)
 import shutil
 
-drive.mount("/content/drive")
-for folder in ["lora_adapter", "gguf_out"]:
-    shutil.copytree(folder, f"/content/drive/MyDrive/text2sql/{folder}", dirs_exist_ok=True)
+model.save_pretrained("lora_adapter")
+tokenizer.save_pretrained("lora_adapter")
+shutil.copytree("lora_adapter", f"{BACKUP_DIR}/lora_adapter", dirs_exist_ok=True)
+
+# %% 7. Ollama용 GGUF 변환 + Drive 백업
+model.save_pretrained_gguf("gguf_out", tokenizer, quantization_method="q4_k_m")
+shutil.copytree("gguf_out", f"{BACKUP_DIR}/gguf_out", dirs_exist_ok=True)
 # Drive의 text2sql/gguf_out 에서 .gguf 파일을 내려받아 로컬에서:
 #   ollama create text2sql-ft -f Modelfile
