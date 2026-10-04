@@ -87,7 +87,24 @@ tokenizer.save_pretrained("lora_adapter")
 shutil.copytree("lora_adapter", f"{BACKUP_DIR}/lora_adapter", dirs_exist_ok=True)
 
 # %% 7. Ollama용 GGUF 변환 + Drive 백업
+import glob
+import os
+
 model.save_pretrained_gguf("gguf_out", tokenizer, quantization_method="q4_k_m")
-shutil.copytree("gguf_out", f"{BACKUP_DIR}/gguf_out", dirs_exist_ok=True)
+
+# 변환 폴더에는 중간 파일(원본 크기 모델, f16 GGUF 등 수 GB)이 남을 수 있어
+# Drive 용량·시간을 아끼려고 q4_k_m GGUF와 Modelfile만 골라 백업한다.
+# (Unsloth 버전에 따라 결과가 gguf_out_gguf/ 같은 폴더에 생기기도 해서 gguf_out* 전체를 찾음)
+all_ggufs = glob.glob("gguf_out*/**/*.gguf", recursive=True) + glob.glob("*.gguf")
+for p in all_ggufs:
+    print(f"{os.path.getsize(p) / 1e9:6.2f} GB  {p}")
+keep = [p for p in all_ggufs if "q4_k_m" in os.path.basename(p).lower()]
+keep += glob.glob("gguf_out*/**/Modelfile", recursive=True)
+assert any(p.endswith(".gguf") for p in keep), "q4_k_m GGUF를 찾지 못함 (위 목록 확인)"
+
+os.makedirs(f"{BACKUP_DIR}/gguf_out", exist_ok=True)
+for p in keep:
+    shutil.copy2(p, f"{BACKUP_DIR}/gguf_out/{os.path.basename(p)}")
+    print("백업 완료:", p)
 # Drive의 text2sql/gguf_out 에서 .gguf 파일을 내려받아 로컬에서:
 #   ollama create text2sql-ft -f Modelfile
