@@ -1,6 +1,7 @@
 # Google Colab(T4 GPU)용 QLoRA 파인튜닝 스크립트.
 # 셀 단위(# %%)로 나눠 두었으니 Colab에 셀별로 복사해 실행하세요.
-# 준비물: 로컬에서 만든 data/sft/train.jsonl 을 Colab에 업로드.
+# 준비물: 로컬에서 만든 data/sft/train.jsonl 을 Colab의 같은 경로(/content/data/sft/)에 업로드.
+# Colab 파일은 런타임이 끊기면 사라지므로 결과물은 마지막 셀에서 Google Drive로 복사한다.
 # Unsloth/TRL 버전에 따라 인자명이 바뀔 수 있으니 오류가 나면 Unsloth 공식 노트북을 참고하세요.
 
 # %% 설치
@@ -31,7 +32,7 @@ model = FastLanguageModel.get_peft_model(
 # %% 데이터 (prompt.py와 동일한 chat 형식)
 from datasets import load_dataset
 
-ds = load_dataset("json", data_files="train.jsonl", split="train")
+ds = load_dataset("json", data_files="data/sft/train.jsonl", split="train")
 ds = ds.map(lambda ex: {"text": tokenizer.apply_chat_template(ex["messages"], tokenize=False)})
 # 스키마가 너무 길어 잘리는 샘플 제외
 ds = ds.filter(lambda ex: len(tokenizer(ex["text"]).input_ids) <= MAX_SEQ_LEN)
@@ -73,5 +74,13 @@ trainer.train()
 model.save_pretrained("lora_adapter")
 tokenizer.save_pretrained("lora_adapter")
 model.save_pretrained_gguf("gguf_out", tokenizer, quantization_method="q4_k_m")
-# gguf_out 폴더의 .gguf 파일을 내려받아 로컬에서:
+
+# %% 결과물을 Google Drive에 백업 (런타임이 끊겨도 보존)
+from google.colab import drive
+import shutil
+
+drive.mount("/content/drive")
+for folder in ["lora_adapter", "gguf_out"]:
+    shutil.copytree(folder, f"/content/drive/MyDrive/text2sql/{folder}", dirs_exist_ok=True)
+# Drive의 text2sql/gguf_out 에서 .gguf 파일을 내려받아 로컬에서:
 #   ollama create text2sql-ft -f Modelfile
