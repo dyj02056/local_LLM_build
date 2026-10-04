@@ -1,0 +1,11 @@
+__pycache__/
+*.egg-info/
+.venv/
+.pytest_cache/
+
+# 대용량 데이터·모델은 커밋하지 않음
+data/spider/
+data/sft/
+outputs/
+*.gguf
+*.safetensors
