@@ -253,6 +253,13 @@ docker compose up --build
 ```
 처음 한 번은 Ollama 이미지와 베이스라인 모델 다운로드, 파인튜닝 모델 등록으로 몇 분 걸리고 디스크를 약 13GB 씁니다. `data/spider/`가 있으면 Spider DB도 함께 보입니다.
 
+### 7. 용량 정리
+Docker, Ollama 모델, 데이터, 패키지를 합치면 약 22~26GB를 씁니다. `scripts/cleanup.ps1`은 기본으로 지울 목록과 크기만 보여 주고, `-Apply`를 붙여야 실제로 지웁니다. 파인튜닝 GGUF(`models/`)는 `-IncludeModels`를 줄 때만 지웁니다.
+```bash
+powershell -ExecutionPolicy Bypass -File scripts/cleanup.ps1
+```
+Docker Desktop은 안에서 지워도 가상 디스크가 자동으로 줄지 않으므로, 정리 후 설정의 **Clean / Purge data**로 공간을 돌려받습니다.
+
 README의 데모 GIF와 스크린샷은 앱을 띄운 상태에서 `web/`의 `npm run record`로 다시 녹화할 수 있습니다 (설치된 Chrome 또는 Edge 사용).
 
 ## 데모 화면

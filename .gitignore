@@ -9,6 +9,7 @@ data/sft/
 # 한국어 평가셋: questions.json만 커밋, DB와 변환 결과는 스크립트로 재생성
 data/korean/database/
 data/korean/dev_ko.jsonl
+data/korean_train/
 outputs/
 web/node_modules/
 web/dist/
