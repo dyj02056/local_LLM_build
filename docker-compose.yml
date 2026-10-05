@@ -7,11 +7,14 @@ services:
     image: ollama/ollama:latest
     volumes:
       - ollama:/root/.ollama
+    # 켜질 때는 2초마다 빨리 확인하고, 준비된 뒤에는 30초마다만 확인한다 (로그가 너무 많이 쌓이지 않게)
     healthcheck:
       test: ["CMD", "ollama", "list"]
-      interval: 5s
+      start_period: 60s
+      start_interval: 2s
+      interval: 30s
       timeout: 5s
-      retries: 30
+      retries: 5
 
   # 모델 준비: 베이스라인 pull + 파인튜닝 GGUF 등록 (이미 있으면 빠르게 끝남)
   ollama-init:
