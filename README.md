@@ -1,7 +1,23 @@
 # Local Text-to-SQL
 
 자연어 질문을 SQL로 바꿔 실행해 주는 **로컬 LLM**입니다.
-오픈소스 코드 모델(Qwen2.5-Coder)을 Spider 데이터셋으로 QLoRA 파인튜닝하고, Ollama로 로컬에서 서빙합니다.
+오픈소스 코드 모델(Qwen2.5-Coder-3B)을 Spider 데이터셋으로 QLoRA 파인튜닝하고, Ollama로 CPU에서 서빙합니다.
+
+![데모: 한국어 질문을 두 모델에 보내 SQL 영수증을 비교하고, 정산 리포트로 평가 결과를 보는 장면](docs/demo.gif)
+
+<sub>실제 실행 화면입니다. 모델이 SQL을 쓰는 대기 시간(CPU에서 문제당 5~30초)만 줄여서 보여 줍니다.</sub>
+
+| 무엇을 했나 | 결과 |
+|---|---|
+| Spider dev 1,034문제로 파인튜닝 전후 비교 | 실행 정확도 **61.8% → 73.4% (+11.6%p)**, SQL 오류율 13.4% → 6.1% |
+| 실행 오류를 모델에 다시 보여 주는 self-correction | +1.0%p. 효과가 작은 원인(같은 SQL 반복 40~65%)을 측정하고, 개선 시도 2가지가 효과 없음을 확인 |
+| 직접 만든 **한국어 쇼핑몰 평가셋 100문제** | 파인튜닝 모델이 오히려 **71% → 66%**. JOIN 2개 이상 문제에서 64% → 14%로 무너지는 약점 발견 |
+| 안전한 실행 | 읽기 전용 연결, SQLite authorizer로 SELECT 외 차단, 5초 제한 |
+| 데모 화면과 배포 | 질문 하나가 영수증 한 장으로 인쇄되는 React 화면, `docker compose up` 한 줄 실행 |
+
+| 계산대: 두 모델 비교 + 자동수정 | 정산 리포트: 평가 결과 |
+|---|---|
+| ![베이스라인은 정답 SQL을 쓰고, 파인튜닝 모델은 같은 오류를 두 번 반복해 VOID 처리된 영수증](docs/screenshot-counter.png) | ![Spider와 한국어 평가 결과를 정리한 정산 리포트](docs/screenshot-report.png) |
 
 ```
 질문 ─▶ FastAPI ─▶ 스키마 + 질문 프롬프트 ─▶ Ollama(파인튜닝 모델) ─▶ SQL
@@ -235,7 +251,9 @@ uvicorn app.main:app
 ```bash
 docker compose up --build
 ```
-처음 한 번은 베이스라인 모델 다운로드(약 2GB)와 파인튜닝 모델 등록으로 몇 분 걸립니다. `data/spider/`가 있으면 Spider DB도 함께 보입니다.
+처음 한 번은 Ollama 이미지와 베이스라인 모델 다운로드, 파인튜닝 모델 등록으로 몇 분 걸리고 디스크를 약 13GB 씁니다. `data/spider/`가 있으면 Spider DB도 함께 보입니다.
+
+README의 데모 GIF와 스크린샷은 앱을 띄운 상태에서 `web/`의 `npm run record`로 다시 녹화할 수 있습니다 (설치된 Chrome 또는 Edge 사용).
 
 ## 데모 화면
 
