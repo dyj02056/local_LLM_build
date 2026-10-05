@@ -62,6 +62,7 @@ def main():
     ap.add_argument("b", help="비교 대상 (예: 파인튜닝) _eval.jsonl")
     ap.add_argument("--examples", type=int, default=5, help="좋아진/나빠진 사례 출력 개수")
     ap.add_argument("--out", help="마크다운 보고서 저장 경로")
+    ap.add_argument("--levels", help="질문별 난이도가 든 JSON (예: data/korean/questions.json)")
     args = ap.parse_args()
 
     A, B = load(args.a), load(args.b)
@@ -92,6 +93,20 @@ def main():
     for k in kinds:
         lines.append(f"| {k} | {ka[k]} | {kb[k]} | {kb[k] - ka[k]:+d} |")
     lines.append("")
+
+    # 2-1. 난이도별 (선택)
+    if args.levels:
+        level_of = {q["question"]: q["level"] for q in json.loads(Path(args.levels).read_text(encoding="utf-8"))}
+        by_level = defaultdict(lambda: [0, 0, 0])
+        for a, b in zip(A, B):
+            lv = by_level[level_of.get(a["question"], "?")]
+            lv[0] += 1
+            lv[1] += a["correct"]
+            lv[2] += b["correct"]
+        lines += ["## 난이도별 정답률", "", f"| 난이도 | {na} | {nb} | 변화 |", "|---|---|---|---|"]
+        for lv, (t, x, y) in by_level.items():
+            lines.append(f"| {lv} | {pct(x, t)} | {pct(y, t)} | {diff(x, y, t)} |")
+        lines.append("")
 
     # 3. SQL 유형별
     by_cat = defaultdict(lambda: [0, 0, 0])  # [문제수, A정답, B정답]

@@ -115,6 +115,35 @@ Spider dev 세트 전체(1,034문제, DB 20개)의 실행 정확도(Execution Ac
 - `train_on_responses_only`로 SQL 부분에만 Loss를 계산하므로, 위 값은 "정답 SQL을 얼마나 그대로 써내는가"를 뜻합니다.
 - 학습 Loss는 학습 데이터 기준이라 일반화 성능을 보장하지 않습니다. 실제 성능은 학습에 쓰지 않은 dev 세트의 실행 정확도로 판단합니다.
 
+## 한국어 평가 (직접 구축)
+
+Spider는 영어 질문뿐이라, 한국어 질문에서도 쓸 만한지 확인하려고 평가셋을 직접 만들었습니다.
+
+- **DB**: 가상 쇼핑몰 (`customers`, `categories`, `products`, `orders`, `order_items`, `reviews`). 고객 200명, 주문 800건, 리뷰 380건. 이름은 영어, 값은 한국어(`'서울'`, `'취소'`)인 국내 서비스에서 흔한 형태입니다. `scripts/build_shop_db.py`가 고정 seed로 생성합니다.
+- **질문 100개**: 쉬움 25, 보통 35, 어려움 40. "~야?", "~줘", "~인가요?"를 섞고, 매출/판매액, 고객/회원처럼 같은 뜻의 다른 표현을 넣었습니다.
+- **정답 검증**: `scripts/prepare_korean.py`가 정답 SQL을 실행해 빈 결과(엉터리 SQL도 우연히 맞을 수 있음)와 `LIMIT`의 동점(정답이 모호함)을 찾습니다. 이 검사로 4문제를 고쳤습니다.
+
+| 모델 | EX | SQL 오류율 | 쉬움 | 보통 | 어려움 |
+|---|---|---|---|---|---|
+| Qwen2.5-Coder-3B (zero-shot) | **71%** | 12% | 96% | 77% | **50%** |
+| QLoRA 파인튜닝 (Spider) | 66% | 13% | 96% | **83%** | 33% |
+
+**Spider에서 +11.6%p였던 파인튜닝이 한국어 쇼핑몰 DB에서는 -5%p였습니다.** 차이는 테이블을 여러 개 이어야 하는 문제에 몰려 있습니다.
+
+| 정답 SQL의 JOIN 수 | 문제 수 | zero-shot | 파인튜닝 |
+|---|---|---|---|
+| 0 | 58 | 74% | 78% |
+| 1 | 28 | 68% | 68% |
+| 2 이상 | 14 | **64%** | **14%** |
+
+- 파인튜닝 모델은 중간 테이블을 건너뛰었습니다. "카테고리별 매출"에서 수량이 있는 `order_items`를 빼고 `orders`와 `products`를 바로 잇거나, `order_items`에 없는 `status`, `customer_id`를 거기서 찾았습니다.
+- Spider에서는 "불필요한 JOIN을 줄이는" 버릇이 정확도를 크게 올렸습니다. 같은 버릇이 `orders → order_items → products → categories`처럼 긴 경로가 꼭 필요한 DB에서는 독이 된 것으로 보입니다. (Spider 학습 데이터에도 JOIN 2개 이상이 18% 있어서, 단순히 학습 데이터에 없어서 생긴 문제는 아닙니다.)
+- Spider 정답의 습관도 따라 했습니다. `count(*)`를 먼저 출력해 컬럼 순서가 바뀌거나(2건), "0과 1 사이 비율"을 요청했는데 100을 곱했습니다.
+- 반대로 한국어 조건을 읽는 능력은 좋아졌습니다. zero-shot은 "**5점** 리뷰를 못 받은 상품"에서 5점 조건을 빠뜨리거나, "**3월**에 들어온 주문"을 3월 1일 이후 전체로 셌는데, 파인튜닝 모델은 둘 다 맞혔습니다.
+- 100문제 규모라 통계적 한계가 있습니다. 전체 차이(새로 맞음 6, 새로 틀림 11)는 부호 검정 z ≈ -1.2로 유의하지 않고, 어려움 난이도만 보면 z ≈ -2.1입니다.
+
+**시사점**: 공개 벤치마크 점수 향상이 실제 서비스 DB 성능을 보장하지 않습니다. 다음 단계는 여러 테이블을 잇는 한국어 학습 데이터를 만들어 추가 학습하는 것입니다.
+
 ## 구조
 
 ```
@@ -132,6 +161,9 @@ scripts/
   compare.py          두 모델 결과 비교 (유형별·DB별·좋아진/나빠진 사례)
   self_correct.py     실행 오류가 난 SQL만 오류 메시지와 함께 다시 고치기
   plot_loss.py        Colab 학습 로그 → Loss 그래프 (pip install -e ".[plot]")
+  build_shop_db.py    한국어 평가용 가상 쇼핑몰 DB 생성
+  prepare_korean.py   한국어 질문 검증 → 평가용 JSONL
+data/korean/questions.json  한국어 질문 100개 + 정답 SQL
 train/finetune_unsloth.py   Colab T4용 QLoRA 학습 → GGUF 변환
 app/main.py                 FastAPI 서버 (/query, /schema, /databases)
 tests/                      실행기 보안·평가 로직 테스트
@@ -172,7 +204,16 @@ python scripts/evaluate.py outputs/preds_ft-3b.jsonl
 python scripts/compare.py outputs/preds_base-3b_eval.jsonl outputs/preds_ft-3b_eval.jsonl
 ```
 
-### 4. API 서버
+### 4. 한국어 평가
+```bash
+python scripts/build_shop_db.py
+python scripts/prepare_korean.py
+python scripts/predict.py --data data/korean/dev_ko.jsonl --model text2sql-ft --tag ko-ft-3b
+python scripts/evaluate.py outputs/preds_ko-ft-3b.jsonl --db-root data/korean/database
+python scripts/compare.py outputs/preds_ko-base-3b_eval.jsonl outputs/preds_ko-ft-3b_eval.jsonl --levels data/korean/questions.json
+```
+
+### 5. API 서버
 ```bash
 set TEXT2SQL_MODEL=text2sql-ft
 uvicorn app.main:app --reload
@@ -191,7 +232,8 @@ uvicorn app.main:app --reload
 - [ ] 베이스라인 측정 (예시 행 포함)
 - [x] QLoRA 파인튜닝 및 비교
 - [x] 오류 분석: JOIN·GROUP BY·중첩 쿼리 등 유형별 실패 사례 정리
-- [ ] **한국어 확장**: 가상 쇼핑몰 DB + 직접 만든 한국어 질문 평가셋(100개 이상)
+- [x] **한국어 확장**: 가상 쇼핑몰 DB + 직접 만든 한국어 질문 평가셋(100개)
+- [ ] 여러 테이블을 잇는 한국어 학습 데이터로 추가 학습
 - [x] 실행 오류 시 에러 메시지를 모델에 다시 주는 self-correction 루프
 - [x] self-correction 개선 실험: 컬럼 목록 힌트, 재시도 temperature (효과 없음, 기본 방식 유지)
 - [ ] 오류 수정 대화를 포함한 추가 학습
