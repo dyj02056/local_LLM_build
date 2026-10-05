@@ -35,12 +35,55 @@ def moving_avg(xs: list[float], k: int) -> list[float]:
     return [sum(xs[max(0, i - k + 1): i + 1]) / len(xs[max(0, i - k + 1): i + 1]) for i in range(len(xs))]
 
 
+SERIES = ["#2a78d6", "#eb6834"]  # 학습 실행별 색 (고정 순서)
+
+
+def plot_compare(logs, labels, out, window):
+    """여러 학습 실행의 이동평균 Loss를 한 그래프에 겹쳐 그린다."""
+    fig, ax = plt.subplots(figsize=(8, 4.2), dpi=150)
+    fig.patch.set_facecolor(SURFACE)
+    ax.set_facecolor(SURFACE)
+    top, right = 0, 0
+    for i, (log, label) in enumerate(zip(logs, labels)):
+        steps, losses = read_log(log)
+        smooth = moving_avg(losses, window)
+        color = SERIES[i % len(SERIES)]
+        ax.plot(steps, losses, color=color, linewidth=1, alpha=0.25)
+        ax.plot(steps, smooth, color=color, linewidth=2)
+        ax.annotate(f"{label}: {smooth[-1]:.3f}", (steps[-1], smooth[-1]), xytext=(6, 8 - 16 * i),
+                    textcoords="offset points", color=INK, fontsize=9, va="center")
+        top, right = max(top, max(losses)), max(right, steps[-1])
+        print(f"{label}: steps {steps[-1]}, loss {losses[0]:.3f} -> 마지막 {window}개 평균 {smooth[-1]:.3f}")
+    ax.set_title("QLoRA fine-tuning loss (moving average of 100 steps, faint = raw)",
+                 color=INK, fontsize=11, loc="left", pad=12)
+    ax.set_xlabel("training step", color=INK_2, fontsize=9)
+    ax.set_ylabel("training loss", color=INK_2, fontsize=9)
+    ax.set_ylim(0, top * 1.1)
+    ax.set_xlim(0, right * 1.42)
+    ax.set_xticks([t for t in ax.get_xticks() if 0 <= t <= right])
+    ax.grid(axis="y", color="#e6e5e0", linewidth=0.8)
+    ax.tick_params(colors=MUTED, labelsize=8, length=0)
+    for side in ("top", "right", "left"):
+        ax.spines[side].set_visible(False)
+    ax.spines["bottom"].set_color("#d4d3cd")
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
+    fig.tight_layout()
+    fig.savefig(out, facecolor=SURFACE)
+    print(f"그래프 -> {out}")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("log")
+    ap.add_argument("log", nargs="+", help="로그 파일. 2개 이상이면 겹쳐 그린다")
+    ap.add_argument("--labels", nargs="+", help="로그별 이름 (겹쳐 그릴 때)")
     ap.add_argument("--out", default="docs/loss_curve.png")
     ap.add_argument("--window", type=int, default=10, help="이동평균 구간 (로그 줄 수)")
     args = ap.parse_args()
+
+    if len(args.log) > 1:
+        plot_compare(args.log, args.labels or [Path(p).stem for p in args.log], args.out, args.window)
+        return
+    args.log = args.log[0]
 
     steps, losses = read_log(args.log)
     smooth = moving_avg(losses, args.window)

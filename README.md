@@ -12,12 +12,13 @@
 | Spider dev 1,034문제로 파인튜닝 전후 비교 | 실행 정확도 **61.8% → 73.4% (+11.6%p)**, SQL 오류율 13.4% → 6.1% |
 | 실행 오류를 모델에 다시 보여 주는 self-correction | +1.0%p. 효과가 작은 원인(같은 SQL 반복 40~65%)을 측정하고, 개선 시도 2가지가 효과 없음을 확인 |
 | 직접 만든 **한국어 쇼핑몰 평가셋 100문제** | 파인튜닝 모델이 오히려 **71% → 66%**. JOIN 2개 이상 문제에서 64% → 14%로 무너지는 약점 발견 |
+| 약점을 겨냥한 v2 학습 (다른 DB 4개로 만든 한국어 다중 JOIN 940문제 추가) | 한국어 66% → 68%, JOIN 2개 이상 2/14 → 4/14로 **일부만 개선**. Spider는 73.4% → 73.1%로 유지. 베이스라인(9/14)은 여전히 못 넘음 |
 | 안전한 실행 | 읽기 전용 연결, SQLite authorizer로 SELECT 외 차단, 5초 제한 |
 | 데모 화면과 배포 | 질문 하나가 영수증 한 장으로 인쇄되는 React 화면, `docker compose up` 한 줄 실행 |
 
-| 계산대: 두 모델 비교 + 자동수정 | 정산 리포트: 평가 결과 |
-|---|---|
-| ![베이스라인은 정답 SQL을 쓰고, 파인튜닝 모델은 같은 오류를 두 번 반복해 VOID 처리된 영수증](docs/screenshot-counter.png) | ![Spider와 한국어 평가 결과를 정리한 정산 리포트](docs/screenshot-report.png) |
+| 계산대: 세 모델 비교 + 자동수정 | v2 영수증 | 정산 리포트 |
+|---|---|---|
+| ![베이스라인은 정답 SQL을 쓰고, 파인튜닝 v1은 같은 오류를 두 번 반복해 VOID 처리된 영수증](docs/screenshot-counter.png) | ![파인튜닝 v2는 주문상품 테이블을 거쳐 같은 질문을 한 번에 맞힌 영수증](docs/screenshot-v2.png) | ![Spider와 한국어 평가 결과를 정리한 정산 리포트](docs/screenshot-report.png) |
 
 ```
 질문 ─▶ FastAPI ─▶ 스키마 + 질문 프롬프트 ─▶ Ollama(파인튜닝 모델) ─▶ SQL
@@ -36,6 +37,7 @@ Spider dev 세트 전체(1,034문제, DB 20개)의 실행 정확도(Execution Ac
 | Qwen2.5-Coder-3B | QLoRA 파인튜닝 | 73.4% | 6.1% | 5.04s |
 | Qwen2.5-Coder-3B | zero-shot + self-correction | 62.6% | 10.3% | 7.57s |
 | Qwen2.5-Coder-3B | QLoRA 파인튜닝 + self-correction | **74.4%** | **3.6%** | 5.97s |
+| Qwen2.5-Coder-3B | QLoRA 파인튜닝 v2 (Spider + 한국어 다중 JOIN) | 73.1% | 6.5% | 5.34s |
 
 ### 파인튜닝 전후 비교
 
@@ -158,7 +160,32 @@ Spider는 영어 질문뿐이라, 한국어 질문에서도 쓸 만한지 확인
 - 반대로 한국어 조건을 읽는 능력은 좋아졌습니다. zero-shot은 "**5점** 리뷰를 못 받은 상품"에서 5점 조건을 빠뜨리거나, "**3월**에 들어온 주문"을 3월 1일 이후 전체로 셌는데, 파인튜닝 모델은 둘 다 맞혔습니다.
 - 100문제 규모라 통계적 한계가 있습니다. 전체 차이(새로 맞음 6, 새로 틀림 11)는 부호 검정 z ≈ -1.2로 유의하지 않고, 어려움 난이도만 보면 z ≈ -2.1입니다.
 
-**시사점**: 공개 벤치마크 점수 향상이 실제 서비스 DB 성능을 보장하지 않습니다. 다음 단계는 여러 테이블을 잇는 한국어 학습 데이터를 만들어 추가 학습하는 것입니다.
+**시사점**: 공개 벤치마크 점수 향상이 실제 서비스 DB 성능을 보장하지 않습니다. 다음 단계로 여러 테이블을 잇는 한국어 학습 데이터를 만들어 추가 학습했습니다 (아래 v2).
+
+### v2: 약점을 겨냥한 한국어 다중 JOIN 학습
+
+평가용 쇼핑몰 DB로 학습하면 시험 문제를 미리 보는 셈이므로, **쇼핑몰과 겹치지 않는 DB 4개**(도서관, 병원, 학원, 여행사)를 새로 만들었습니다. 전자상거래 형태(배달앱 등)는 구조가 비슷해서 일부러 뺐습니다.
+
+| 항목 | 내용 |
+|---|---|
+| 학습 데이터 | 템플릿 70여 개로 만든 한국어 질문 940개 (JOIN 2개 이상 585개, 62%). 값은 실제 DB에서 뽑고, 모든 SQL을 실행해 빈 결과·동점인 예시는 버림 |
+| 학습 방식 | v1과 같은 설정으로 처음부터 다시 학습. Spider 8,659 + 한국어 940 × 2 = 10,539개 (한국어 17.8%) |
+| 재현 | `build_korean_train_dbs.py` → `gen_korean_train.py` → `make_train_v2.py` → Colab (`RUN = "v2"`) |
+
+| 평가 | 베이스라인 | v1 (Spider) | v2 (+한국어) |
+|---|---|---|---|
+| 한국어 100문제 | **71%** | 66% | 68% |
+| └ JOIN 2개 이상 (14문제) | **9** | 2 | 4 |
+| └ 어려움 (40문제) | **50%** | 33% | 33% |
+| Spider dev 1,034문제 | 61.8% | **73.4%** | 73.1% |
+
+- **좋아진 점**: v2는 주문 → **주문상품** → 상품 → 카테고리처럼 중간 테이블을 거치는 법을 일부 배웠습니다. v1이 `order_items`를 건너뛰어 실행 오류를 냈던 "카테고리별 매출" 질문을 v2는 한 번에 맞힙니다.
+- **Spider는 그대로**: 73.4% → 73.1%로, 문제별로는 새로 맞음 51 / 새로 틀림 54입니다. 한국어를 더 배워도 영어 실력이 떨어지지 않았습니다.
+- **한계**: 한국어 전체 차이(v1 대비 새로 맞음 8 / 새로 틀림 6)는 우연과 구분되지 않고, 어려움 난이도는 그대로이며, 베이스라인(JOIN 2개 이상 9/14)에는 여전히 크게 못 미칩니다. 남은 오답은 JOIN 경로는 맞게 잡았지만 컬럼을 엉뚱한 테이블에서 찾거나(`products.unit_price`), 카테고리 대신 상품으로 묶는 경우가 많습니다.
+- **해석**: 템플릿 70여 개는 표현과 구조가 단조로워 패턴을 외우기 쉽습니다. v2의 학습 Loss(0.062)가 v1(0.080)보다 낮은 것도 실력보다 이 규칙적인 데이터 때문으로 봅니다. 더 다양한 질문 구조와 사람이 쓴 질문이 필요합니다.
+- **알려진 편향**: 평가 질문과 학습 질문을 같은 사람(이 프로젝트의 작성자와 AI 보조)이 만들어 말투가 비슷할 수 있습니다. 이를 확인하려고 외부 LLM 4곳(ChatGPT, Gemini, DeepSeek, Meta)이 쓴 질문으로 추가 평가를 준비하고 있습니다.
+
+![v1과 v2의 학습 Loss 비교](docs/loss_compare.png)
 
 ## 구조
 
@@ -178,6 +205,8 @@ scripts/
   self_correct.py     실행 오류가 난 SQL만 오류 메시지와 함께 다시 고치기
   plot_loss.py        Colab 학습 로그 → Loss 그래프 (pip install -e ".[plot]")
   build_shop_db.py    한국어 평가용 가상 쇼핑몰 DB 생성
+  build_korean_train_dbs.py, gen_korean_train.py, make_train_v2.py   v2 학습 데이터 (쇼핑몰과 다른 DB 4개)
+  cleanup.ps1         프로젝트 종료 후 용량 정리 (기본은 미리보기)
   prepare_korean.py   한국어 질문 검증 → 평가용 JSONL
   export_demo_data.py 화면에 보여 줄 실측 데이터 → web/src/data/
 data/korean/questions.json  한국어 질문 100개 + 정답 SQL
@@ -219,6 +248,7 @@ python scripts/evaluate.py outputs/preds_base-3b.jsonl
 
 ```bash
 ollama create text2sql-ft -f models/Modelfile
+ollama create text2sql-ft-v2 -f models/v2/Modelfile
 python scripts/predict.py --model text2sql-ft --tag ft-3b
 python scripts/evaluate.py outputs/preds_ft-3b.jsonl
 python scripts/compare.py outputs/preds_base-3b_eval.jsonl outputs/preds_ft-3b_eval.jsonl
@@ -244,7 +274,7 @@ uvicorn app.main:app
 `http://localhost:8000`에서 데모를, `http://localhost:8000/docs`에서 API를 볼 수 있습니다.
 화면을 고치면서 볼 때는 `uvicorn`을 켜 둔 채 `web/`에서 `npm run dev`를 실행하고 `http://localhost:5173`을 엽니다.
 
-환경변수: `BASE_MODEL`(기본 `qwen2.5-coder:3b`), `FT_MODEL`(기본 `text2sql-ft`), `OLLAMA_URL`, `DB_ROOT`(Spider DB), `KOREAN_DB_ROOT`.
+환경변수: `BASE_MODEL`(기본 `qwen2.5-coder:3b`), `FT_MODEL`(기본 `text2sql-ft`), `FT2_MODEL`(기본 `text2sql-ft-v2`, 없으면 화면에서 비활성화), `OLLAMA_URL`, `DB_ROOT`(Spider DB), `KOREAN_DB_ROOT`.
 
 ### 6. Docker Compose
 `models/`에 GGUF 파일과 `Modelfile`을 넣은 뒤 Docker Desktop을 켜고 실행합니다.
@@ -286,9 +316,10 @@ README의 데모 GIF와 스크린샷은 앱을 띄운 상태에서 `web/`의 `np
 - [x] QLoRA 파인튜닝 및 비교
 - [x] 오류 분석: JOIN·GROUP BY·중첩 쿼리 등 유형별 실패 사례 정리
 - [x] **한국어 확장**: 가상 쇼핑몰 DB + 직접 만든 한국어 질문 평가셋(100개)
-- [ ] 여러 테이블을 잇는 한국어 학습 데이터로 추가 학습
+- [x] 여러 테이블을 잇는 한국어 학습 데이터로 추가 학습 (v2: 일부 개선, 베이스라인 미달)
+- [ ] 외부 LLM 4곳이 쓴 한국어 질문으로 평가 편향 확인
 - [x] 실행 오류 시 에러 메시지를 모델에 다시 주는 self-correction 루프
 - [x] self-correction 개선 실험: 컬럼 목록 힌트, 재시도 temperature (효과 없음, 기본 방식 유지)
 - [ ] 오류 수정 대화를 포함한 추가 학습
 - [x] 데모 화면(영수증 프린터), Docker Compose
-- [ ] README에 데모 GIF 추가, GitHub 공개
+- [x] README에 데모 GIF 추가, GitHub 공개

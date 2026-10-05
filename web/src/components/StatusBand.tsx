@@ -51,7 +51,7 @@ function Connection({ health, error }: { health: Health | null; error: boolean }
   const ready = Object.values(health.models).filter((m) => m.installed).length;
   return (
     <span>
-      Ollama 연결됨 · 모델 {ready}/2
+      Ollama 연결됨 · 모델 {ready}/{Object.keys(health.models).length}
     </span>
   );
 }

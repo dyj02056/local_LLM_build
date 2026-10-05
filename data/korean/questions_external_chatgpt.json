@@ -1,0 +1,212 @@
+[
+{
+"id": 1,
+"level": "쉬움",
+"question": "회원이 총 몇 명이야?",
+"query": "SELECT COUNT(*) AS 고객수 FROM customers;",
+"note": ""
+},
+{
+"id": 2,
+"level": "쉬움",
+"question": "상품 재고가 0개인 상품 몇 개야?",
+"query": "SELECT COUNT(*) AS 상품수 FROM products WHERE stock = 0;",
+"note": ""
+},
+{
+"id": 3,
+"level": "쉬움",
+"question": "서울에 사는 고객 수 알려줘.",
+"query": "SELECT COUNT(*) AS 고객수 FROM customers WHERE city = '서울';",
+"note": ""
+},
+{
+"id": 4,
+"level": "쉬움",
+"question": "VIP 회원은 몇 명 있어?",
+"query": "SELECT COUNT(*) AS 고객수 FROM customers WHERE grade = 'VIP';",
+"note": ""
+},
+{
+"id": 5,
+"level": "쉬움",
+"question": "상품 현재 판매가 평균 얼마야?",
+"query": "SELECT AVG(price) AS 평균판매가 FROM products;",
+"note": ""
+},
+{
+"id": 6,
+"level": "쉬움",
+"question": "2025년에 가입한 회원이 몇 명인지 알려주세요.",
+"query": "SELECT COUNT(*) AS 고객수 FROM customers WHERE joined_at >= '2025-01-01' AND joined_at <= '2025-12-31';",
+"note": ""
+},
+{
+"id": 7,
+"level": "쉬움",
+"question": "여성 고객이 몇 명이야?",
+"query": "SELECT COUNT(*) AS 고객수 FROM customers WHERE gender = 'F';",
+"note": ""
+},
+{
+"id": 8,
+"level": "쉬움",
+"question": "2025년 12월 31일 기준으로 재고가 10개 이하인 상품의 상품명과 재고를 보여줘.",
+"query": "SELECT name AS 상품명, stock AS 재고 FROM products WHERE stock <= 10;",
+"note": "재고는 현재 재고만 제공되므로 2025년 12월 31일 기준을 현재 데이터의 재고 값으로 해석했습니다."
+},
+{
+"id": 9,
+"level": "보통",
+"question": "카테고리별로 상품이 몇 개씩 있는지 보여줘.",
+"query": "SELECT c.name AS 카테고리, COUNT(p.product_id) AS 상품수 FROM categories c JOIN products p ON c.category_id = p.category_id GROUP BY c.category_id, c.name;",
+"note": ""
+},
+{
+"id": 10,
+"level": "보통",
+"question": "브랜드별 상품 수를 알려줘.",
+"query": "SELECT brand AS 브랜드, COUNT(*) AS 상품수 FROM products GROUP BY brand;",
+"note": ""
+},
+{
+"id": 11,
+"level": "보통",
+"question": "등급별 회원 수 보여줘.",
+"query": "SELECT grade AS 등급, COUNT(*) AS 회원수 FROM customers GROUP BY grade;",
+"note": ""
+},
+{
+"id": 12,
+"level": "보통",
+"question": "도시별 회원 수를 보여주세요.",
+"query": "SELECT city AS 도시, COUNT(*) AS 회원수 FROM customers GROUP BY city;",
+"note": ""
+},
+{
+"id": 13,
+"level": "보통",
+"question": "주문 상태별로 주문 건수가 어떻게 되는지 알려줘.",
+"query": "SELECT status AS 주문상태, COUNT(*) AS 주문건수 FROM orders GROUP BY status;",
+"note": ""
+},
+{
+"id": 14,
+"level": "보통",
+"question": "결제수단별 주문 건수 보여줘. 취소 주문도 포함해.",
+"query": "SELECT payment_method AS 결제수단, COUNT(*) AS 주문건수 FROM orders GROUP BY payment_method;",
+"note": "주문 상태 조건이 없으므로 모든 주문을 포함했습니다."
+},
+{
+"id": 15,
+"level": "보통",
+"question": "상품별 리뷰 평균 평점 알려줘.",
+"query": "SELECT product_id AS 상품ID, AVG(rating) AS 평균평점 FROM reviews GROUP BY product_id;",
+"note": "상품명 대신 스키마에서 리뷰만으로 바로 식별 가능한 상품ID를 보여주도록 정했습니다."
+},
+{
+"id": 16,
+"level": "보통",
+"question": "각 상품의 리뷰 개수와 평균 평점을 같이 보여줘.",
+"query": "SELECT product_id AS 상품ID, COUNT(*) AS 리뷰수, AVG(rating) AS 평균평점 FROM reviews GROUP BY product_id;",
+"note": "상품명은 질문에서 요구하지 않았으므로 상품ID로 구분했습니다."
+},
+{
+"id": 17,
+"level": "보통",
+"question": "2025년 12월에 들어온 주문을 상태별로 몇 건인지 알려줘. 취소도 포함.",
+"query": "SELECT status AS 주문상태, COUNT(*) AS 주문건수 FROM orders WHERE order_date >= '2025-12-01' AND order_date <= '2025-12-31' GROUP BY status;",
+"note": ""
+},
+{
+"id": 18,
+"level": "보통",
+"question": "주문한 고객이 몇 명인지 알려줘. 취소 주문 고객도 포함해.",
+"query": "SELECT COUNT(DISTINCT customer_id) AS 고객수 FROM orders;",
+"note": "주문 횟수가 아니라 한 번이라도 주문한 서로 다른 고객 수로 계산했습니다."
+},
+{
+"id": 19,
+"level": "어려움",
+"question": "취소되지 않은 주문 기준으로 상품별 판매 수량을 알려줘. 상품명과 판매 수량을 보여주고 많이 팔린 순으로 정렬해.",
+"query": "SELECT p.name AS 상품명, SUM(oi.quantity) AS 판매수량 FROM order_items oi JOIN orders o ON oi.order_id = o.order_id JOIN products p ON oi.product_id = p.product_id WHERE o.status <> '취소' GROUP BY p.product_id, p.name ORDER BY 판매수량 DESC;",
+"note": "판매 수량은 주문 상품의 수량 합계로 계산하고 취소 주문은 제외했습니다."
+},
+{
+"id": 20,
+"level": "어려움",
+"question": "취소된 주문을 빼고 카테고리별 판매액을 계산해줘. 판매액은 수량 × 주문 당시 가격으로 하고, 카테고리명과 판매액을 보여줘.",
+"query": "SELECT c.name AS 카테고리, SUM(oi.quantity * oi.unit_price) AS 판매액 FROM order_items oi JOIN orders o ON oi.order_id = o.order_id JOIN products p ON oi.product_id = p.product_id JOIN categories c ON p.category_id = c.category_id WHERE o.status <> '취소' GROUP BY c.category_id, c.name;",
+"note": "판매액은 각 상품의 수량과 주문 당시 가격을 곱한 금액의 합으로 계산했습니다."
+},
+{
+"id": 21,
+"level": "어려움",
+"question": "취소 주문 제외하고 브랜드별 판매액을 구해줘. 판매액은 수량 × 주문 당시 가격이고, 브랜드와 판매액을 보여줘.",
+"query": "SELECT p.brand AS 브랜드, SUM(oi.quantity * oi.unit_price) AS 판매액 FROM order_items oi JOIN orders o ON oi.order_id = o.order_id JOIN products p ON oi.product_id = p.product_id WHERE o.status <> '취소' GROUP BY p.brand;",
+"note": "판매액은 수량 × 주문 당시 가격으로 계산했으며 취소 주문은 제외했습니다."
+},
+{
+"id": 22,
+"level": "어려움",
+"question": "2025년 전체에서 취소 주문을 제외하고 도시별 구매 금액을 보여줘. 구매 금액은 수량 × 주문 당시 가격으로 계산해.",
+"query": "SELECT c.city AS 도시, SUM(oi.quantity * oi.unit_price) AS 구매금액 FROM customers c JOIN orders o ON c.customer_id = o.customer_id JOIN order_items oi ON o.order_id = oi.order_id WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status <> '취소' GROUP BY c.city;",
+"note": "구매 금액은 해당 도시 고객의 취소되지 않은 주문 상품 금액 합계로 계산했습니다."
+},
+{
+"id": 23,
+"level": "어려움",
+"question": "취소 주문 빼고 회원 등급별 구매 금액을 알려줘. 등급과 구매 금액을 보여주고, 구매 금액은 수량 × 주문 당시 가격이야.",
+"query": "SELECT c.grade AS 등급, SUM(oi.quantity * oi.unit_price) AS 구매금액 FROM customers c JOIN orders o ON c.customer_id = o.customer_id JOIN order_items oi ON o.order_id = oi.order_id WHERE o.status <> '취소' GROUP BY c.grade;",
+"note": ""
+},
+{
+"id": 24,
+"level": "어려움",
+"question": "취소 주문 제외하고 고객별 주문 건수와 구매 금액을 보여줘. 고객 이름, 주문 건수, 구매 금액 순서로 부탁해.",
+"query": "SELECT c.name AS 고객명, COUNT(DISTINCT o.order_id) AS 주문건수, SUM(oi.quantity * oi.unit_price) AS 구매금액 FROM customers c JOIN orders o ON c.customer_id = o.customer_id JOIN order_items oi ON o.order_id = oi.order_id WHERE o.status <> '취소' GROUP BY c.customer_id, c.name;",
+"note": "주문 건수는 상품 줄 수가 아니라 서로 다른 주문 수로 계산했습니다."
+},
+{
+"id": 25,
+"level": "어려움",
+"question": "2025년 12월 31일 기준 최근 3개월인 10월~12월에 취소 주문을 빼고, 카테고리별로 구매한 고객 수와 판매 수량을 보여줘.",
+"query": "SELECT c.name AS 카테고리, COUNT(DISTINCT o.customer_id) AS 고객수, SUM(oi.quantity) AS 판매수량 FROM categories c JOIN products p ON c.category_id = p.category_id JOIN order_items oi ON p.product_id = oi.product_id JOIN orders o ON oi.order_id = o.order_id WHERE o.order_date >= '2025-10-01' AND o.order_date <= '2025-12-31' AND o.status <> '취소' GROUP BY c.category_id, c.name;",
+"note": "최근 3개월은 기준일 2025년 12월 31일을 포함해 2025년 10월 1일부터 12월 31일까지로 정했습니다."
+},
+{
+"id": 26,
+"level": "어려움",
+"question": "취소 주문을 제외하고 브랜드별로 구매한 고객 수와 판매액을 보여줘. 판매액은 수량 × 주문 당시 가격으로 계산해.",
+"query": "SELECT p.brand AS 브랜드, COUNT(DISTINCT o.customer_id) AS 고객수, SUM(oi.quantity * oi.unit_price) AS 판매액 FROM products p JOIN order_items oi ON p.product_id = oi.product_id JOIN orders o ON oi.order_id = o.order_id WHERE o.status <> '취소' GROUP BY p.brand;",
+"note": "고객 수는 해당 브랜드 상품을 한 번 이상 구매한 서로 다른 고객 수입니다."
+},
+{
+"id": 27,
+"level": "어려움",
+"question": "취소 주문 빼고 카테고리별 판매 수량이 100개 이상인 카테고리만 보여줘. 카테고리명과 판매 수량을 알려줘.",
+"query": "SELECT c.name AS 카테고리, SUM(oi.quantity) AS 판매수량 FROM categories c JOIN products p ON c.category_id = p.category_id JOIN order_items oi ON p.product_id = oi.product_id JOIN orders o ON oi.order_id = o.order_id WHERE o.status <> '취소' GROUP BY c.category_id, c.name HAVING SUM(oi.quantity) >= 100;",
+"note": "판매 수량은 취소되지 않은 주문의 상품 수량 합계이며 100개 이상을 포함했습니다."
+},
+{
+"id": 28,
+"level": "어려움",
+"question": "취소 주문을 제외하고 구매 금액이 전체 고객 평균보다 큰 고객의 이름과 구매 금액을 보여줘. 구매 금액은 수량 × 주문 당시 가격으로 계산해.",
+"query": "SELECT c.name AS 고객명, SUM(oi.quantity * oi.unit_price) AS 구매금액 FROM customers c JOIN orders o ON c.customer_id = o.customer_id JOIN order_items oi ON o.order_id = oi.order_id WHERE o.status <> '취소' GROUP BY c.customer_id, c.name HAVING SUM(oi.quantity * oi.unit_price) > (SELECT AVG(customer_total) FROM (SELECT o2.customer_id, SUM(oi2.quantity * oi2.unit_price) AS customer_total FROM orders o2 JOIN order_items oi2 ON o2.order_id = oi2.order_id WHERE o2.status <> '취소' GROUP BY o2.customer_id));",
+"note": "평균은 취소 주문을 제외한 구매 고객별 구매 금액의 평균으로 정했습니다."
+},
+{
+"id": 29,
+"level": "어려움",
+"question": "취소 주문을 제외하고 전자제품과 의류를 둘 다 구매한 고객의 이름만 보여줘.",
+"query": "SELECT c.name AS 고객명 FROM customers c JOIN orders o ON c.customer_id = o.customer_id JOIN order_items oi ON o.order_id = oi.order_id JOIN products p ON oi.product_id = p.product_id JOIN categories cat ON p.category_id = cat.category_id WHERE o.status <> '취소' AND cat.name = '전자제품' INTERSECT SELECT c2.name AS 고객명 FROM customers c2 JOIN orders o2 ON c2.customer_id = o2.customer_id JOIN order_items oi2 ON o2.order_id = oi2.order_id JOIN products p2 ON oi2.product_id = p2.product_id JOIN categories cat2 ON p2.category_id = cat2.category_id WHERE o2.status <> '취소' AND cat2.name = '의류';",
+"note": "두 카테고리 모두에서 취소되지 않은 구매 이력이 있는 고객으로 정했습니다."
+},
+{
+"id": 30,
+"level": "어려움",
+"question": "2025년 12월 31일 기준 최근 3개월에 구매한 고객 중 취소 주문을 빼고, 최근 3개월에는 구매했지만 그 이전에는 구매하지 않은 고객의 이름과 구매 금액을 보여줘. 구매 금액은 최근 3개월 동안의 수량 × 주문 당시 가격 합계야.",
+"query": "SELECT c.name AS 고객명, SUM(oi.quantity * oi.unit_price) AS 구매금액 FROM customers c JOIN orders o ON c.customer_id = o.customer_id JOIN order_items oi ON o.order_id = oi.order_id WHERE o.status <> '취소' AND o.order_date >= '2025-10-01' AND o.order_date <= '2025-12-31' AND c.customer_id NOT IN (SELECT o2.customer_id FROM orders o2 WHERE o2.status <> '취소' AND o2.order_date < '2025-10-01') GROUP BY c.customer_id, c.name;",
+"note": "최근 3개월은 2025년 10월 1일~12월 31일로 정했고, 그 이전 구매는 취소되지 않은 주문만 대상으로 했습니다."
+}
+]

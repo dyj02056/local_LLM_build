@@ -139,7 +139,7 @@ export function Receipt({ job, dbLabel }: { job: Job; dbLabel: string }) {
           k="모델"
           v={
             <>
-              <span className={job.modelKey === "ft" ? "bg-ink px-1 text-paper" : ""}>{MODEL_LABEL[job.modelKey]}</span>{" "}
+              <span className={job.modelKey !== "base" ? "bg-ink px-1 text-paper" : ""}>{MODEL_LABEL[job.modelKey]}</span>{" "}
               {job.modelName}
             </>
           }

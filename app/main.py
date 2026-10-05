@@ -8,7 +8,8 @@
     KOREAN_DB_ROOT  한국어 쇼핑몰 DB 폴더 (기본 data/korean/database)
     DB_ROOT         Spider DB 폴더 (기본 data/spider/database)
     BASE_MODEL      베이스라인 모델 (기본 qwen2.5-coder:3b)
-    FT_MODEL        파인튜닝 모델 (기본 text2sql-ft)
+    FT_MODEL        파인튜닝 v1 모델 (기본 text2sql-ft, Spider만 학습)
+    FT2_MODEL       파인튜닝 v2 모델 (기본 text2sql-ft-v2, Spider + 한국어 다중 JOIN 학습)
     OLLAMA_URL
 """
 
@@ -39,6 +40,7 @@ SPIDER_DEV_JSON = SPIDER_DB_ROOT.parent / "dev.json"
 MODELS = {
     "base": os.environ.get("BASE_MODEL", "qwen2.5-coder:3b"),
     "ft": os.environ.get("FT_MODEL", "text2sql-ft"),
+    "ft2": os.environ.get("FT2_MODEL", "text2sql-ft-v2"),
 }
 MAX_ROWS = 200
 _DB_ID_RE = re.compile(r"^[A-Za-z0-9_]+$")
@@ -75,7 +77,7 @@ def _resolve_db(db_id: str) -> Path:
 class QueryRequest(BaseModel):
     db_id: str
     question: str = Field(min_length=1, max_length=1000)
-    model: Literal["base", "ft"] = "ft"
+    model: Literal["base", "ft", "ft2"] = "ft"
     self_correct: bool = False
 
 

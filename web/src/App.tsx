@@ -2,12 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { type Database, getDatabases, getHealth, type Health, type ModelKey, runQuery } from "./api";
 import { Catalog } from "./components/Catalog";
 import { OutputTray } from "./components/OutputTray";
-import { PrinterPanel } from "./components/PrinterPanel";
+import { compareKeys, PrinterPanel } from "./components/PrinterPanel";
 import { StatusBand, type View } from "./components/StatusBand";
 import { ZReport } from "./components/ZReport";
 import type { Job, Mode } from "./types";
 
 const MAX_JOBS = 12;
+const DEFAULT_NAMES: Record<ModelKey, string> = { base: "qwen2.5-coder:3b", ft: "text2sql-ft", ft2: "text2sql-ft-v2" };
 
 function useHealth() {
   const [health, setHealth] = useState<Health | null>(null);
@@ -60,7 +61,7 @@ export default function App() {
   const last = jobs.find((j) => j.status === "done") ?? null;
 
   async function print() {
-    const keys: ModelKey[] = mode === "compare" ? ["base", "ft"] : [mode];
+    const keys: ModelKey[] = mode === "compare" ? compareKeys(health) : [mode];
     const now = Date.now();
     const pairId = keys.length > 1 ? now : null;
     const created: Job[] = keys.map((k, i) => ({
@@ -69,7 +70,7 @@ export default function App() {
       pairId,
       dbId,
       modelKey: k,
-      modelName: health?.models[k].name ?? (k === "base" ? "qwen2.5-coder:3b" : "text2sql-ft"),
+      modelName: health?.models[k]?.name ?? DEFAULT_NAMES[k],
       question: question.trim(),
       selfCorrect,
       startedAt: now,

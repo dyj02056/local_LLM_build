@@ -88,9 +88,11 @@ const browser = await puppeteer.launch({ executablePath: exe, headless: true, de
 try {
   const page = await browser.newPage();
   await page.goto(URL, { waitUntil: "networkidle0" });
-  await page.waitForFunction(() => document.querySelector("header [role=status]")?.textContent?.includes("2/2"), {
-    timeout: 20000,
-  });
+  // 상단 띠가 "모델 n/n" (모든 모델 준비됨)이 될 때까지 기다린다
+  await page.waitForFunction(
+    () => /모델 (\d+)\/\1/.test(document.querySelector("header [role=status]")?.textContent ?? ""),
+    { timeout: 20000 },
+  );
 
   // 1) 빈 계산대
   await film(page, 1200, 4);
@@ -117,6 +119,24 @@ try {
   await smoothScroll(page, voidY);
   await film(page, 2200, 4);
   await page.screenshot({ path: new globalThis.URL("screenshot-counter.png", OUT), type: "png" });
+
+  // 비교 영수증이 3장이면 세 번째(v2) 영수증까지 내려가서 보여 주고 따로 찍는다
+  const third = await page.evaluate(() => {
+    const el = [...document.querySelectorAll("article")][2];
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { top: r.top + scrollY, x: r.left, width: r.width, height: r.height };
+  });
+  if (third) {
+    await smoothScroll(page, third.top - 70);
+    await film(page, 2400, 4);
+    await page.screenshot({
+      path: new globalThis.URL("screenshot-v2.png", OUT),
+      type: "png",
+      captureBeyondViewport: true,
+      clip: { x: third.x, y: third.top, width: third.width, height: Math.min(third.height, 900) },
+    });
+  }
   await smoothScroll(page, 0, 900);
 
   // 5) 정산 리포트

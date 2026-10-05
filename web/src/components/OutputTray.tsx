@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { sameRows } from "../format";
-import type { Job } from "../types";
+import { type Job, MODEL_LABEL } from "../types";
 import { Receipt } from "./Receipt";
 
 type Group = { key: number; jobs: Job[] };
@@ -15,20 +15,29 @@ function groupJobs(jobs: Job[]): Group[] {
   return groups;
 }
 
-/** 비교 결과 꼬리표: 두 영수증의 결과 행이 같은지 */
+/** 비교 결과 꼬리표: 영수증들의 결과 행이 같은지 (정답 여부는 모름) */
 function CompareTag({ jobs }: { jobs: Job[] }) {
-  const [a, b] = jobs;
-  if (!a?.result || !b?.result) return null;
+  if (jobs.some((j) => j.status !== "done" && j.status !== "failed")) return null;
+  const ok = jobs.filter((j) => j.result && !j.result.error);
+  const failed = jobs.filter((j) => !j.result || j.result.error).map((j) => MODEL_LABEL[j.modelKey]);
+  // 같은 결과를 낸 모델끼리 묶는다
+  const groups: Job[][] = [];
+  for (const j of ok) {
+    const g = groups.find((x) => sameRows(x[0].result!.rows, j.result!.rows));
+    if (g) g.push(j);
+    else groups.push([j]);
+  }
   let text: string;
   let strong = false;
-  if (a.result.error || b.result.error) {
-    text = "한쪽 이상이 실행에 실패해 결과를 비교할 수 없습니다";
-  } else if (sameRows(a.result.rows, b.result.rows)) {
-    text = "두 모델의 결과 행이 같습니다";
+  if (ok.length < 2) {
+    text = "실행에 성공한 영수증이 2장 미만이라 결과를 비교할 수 없습니다";
+  } else if (groups.length === 1) {
+    text = `${ok.length}개 모델의 결과 행이 모두 같습니다`;
   } else {
-    text = "두 모델의 결과 행이 다릅니다";
+    text = `결과 행이 갈립니다: ${groups.map((g) => g.map((j) => MODEL_LABEL[j.modelKey]).join(", ")).join(" / ")}`;
     strong = true;
   }
+  if (failed.length && ok.length >= 2) text += ` (실행 실패: ${failed.join(", ")})`;
   return (
     <p className={`font-receipt text-[13px] ${strong ? "text-thermal-soft" : "text-counter-mute"}`}>
       비교 · {text}
@@ -51,7 +60,7 @@ export function OutputTray({ jobs, dbLabel }: { jobs: Job[]; dbLabel: (id: strin
             시간이 영수증으로 나옵니다.
           </p>
           <p className="max-w-[52ch] leading-relaxed text-counter-mute">
-            '둘 다 비교'를 고르면 베이스라인과 파인튜닝 영수증이 나란히 인쇄됩니다.
+            '모두 비교'를 고르면 베이스라인, 파인튜닝 v1, v2의 영수증이 차례로 인쇄되고 결과가 같은지 표시됩니다.
           </p>
         </div>
       ) : (

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { korean, selfCorrection, spider, training } from "../data/report";
+import { korean, selfCorrection, spider, training, v2Data } from "../data/report";
 import { LossChart } from "./LossChart";
 
 /** 정산 테이프의 한 구역. 구역 사이는 이중선으로 끊는다. */
@@ -96,6 +96,11 @@ function ZTape() {
         <span className="dh">{delta(korean.overall.ft - korean.overall.base)}</span>
       </div>
       <div className="rule-dash my-3" />
+      <p className="text-ink-mute">v2: 한국어 다중 JOIN 940문제 추가 학습</p>
+      {line("한국어 정확도 (v1→v2)", `${korean.overall.ft}% → ${korean.overall.ft2}%`)}
+      {line("JOIN 2개 이상", `${korean.byJoins[2].ft}/14 → ${korean.byJoins[2].ft2}/14`)}
+      {line("Spider (v1→v2)", `${pct(s2.ex)} → ${pct(spider.rows[4].ex)}`)}
+      <div className="rule-dash my-3" />
       {line("자동수정 (Spider)", delta(spider.rows[3].ex - s2.ex))}
       {line("학습 Loss", `${training.lossStart.toFixed(3)} → ${training.lossEnd.toFixed(3)}`)}
       <div className="rule-dash my-3" />
@@ -191,7 +196,7 @@ export function ZReport() {
 
         <Segment
           title="한국어 쇼핑몰 100문제"
-          note="직접 만든 질문과 정답 SQL입니다. Spider에서 오른 파인튜닝이 여기서는 내려갔고, 차이는 테이블을 여러 개 이어야 하는 문제에 몰려 있습니다."
+          note="직접 만든 질문과 정답 SQL입니다. v1(Spider만 학습)은 여러 테이블을 이어야 하는 문제에서 무너졌고, 그 약점을 겨냥해 v2를 학습했습니다."
         >
           {[
             { head: "난이도", rows: korean.byLevel.map((r) => ({ k: r.level, ...r })) },
@@ -203,41 +208,55 @@ export function ZReport() {
                   <tr>
                     <th className={th}>{tbl.head}</th>
                     <th className={`${th} text-right`}>문제</th>
-                    <th className={`${th} text-right`}>전</th>
-                    <th className={`${th} text-right`}>후</th>
-                    <th className={`${th} ${CHART_COL} w-[40%]`} aria-label="전후 비교 눈금" />
+                    <th className={`${th} text-right`}>베이스라인</th>
+                    <th className={`${th} text-right`}>v1</th>
+                    <th className={`${th} text-right`}>v2</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tbl.rows.map((r) => {
-                    const b = (r.base / r.n) * 100;
-                    const f = (r.ft / r.n) * 100;
-                    const worse = f < b - 10;
+                    const p = (v: number) => Math.round((v / r.n) * 100);
+                    const worse = (v: number) => p(v) < p(r.base) - 10;
                     return (
-                      <tr key={r.k} className={worse ? "text-thermal" : ""}>
-                        <td className={`${td} ${worse ? UNDERLINE : ""}`}>{r.k}</td>
+                      <tr key={r.k} className={worse(r.ft) || worse(r.ft2) ? "text-thermal" : ""}>
+                        <td className={td}>{r.k}</td>
                         <td className={`${td} text-right text-ink-mute`}>{r.n}</td>
-                        <td className={`${td} text-right`}>{Math.round(b)}%</td>
-                        <td className={`${td} text-right ${worse ? UNDERLINE : ""}`}>{Math.round(f)}%</td>
-                        <td className={`${td} ${CHART_COL}`}>
-                          <Dumbbell base={b} ft={f} worse={worse} />
-                        </td>
+                        <td className={`${td} text-right`}>{p(r.base)}%</td>
+                        <td className={`${td} text-right ${worse(r.ft) ? UNDERLINE : ""}`}>{p(r.ft)}%</td>
+                        <td className={`${td} text-right ${worse(r.ft2) ? UNDERLINE : ""}`}>{p(r.ft2)}%</td>
                       </tr>
                     );
                   })}
+                  {tbl.head === "난이도" && (
+                    <tr className="font-bold">
+                      <td className={`${td} border-t-[1.5px] border-dashed border-ink/50`}>전체</td>
+                      <td className={`${td} border-t-[1.5px] border-dashed border-ink/50 text-right text-ink-mute`}>{korean.total}</td>
+                      <td className={`${td} border-t-[1.5px] border-dashed border-ink/50 text-right`}>{korean.overall.base}%</td>
+                      <td className={`${td} border-t-[1.5px] border-dashed border-ink/50 text-right`}>{korean.overall.ft}%</td>
+                      <td className={`${td} border-t-[1.5px] border-dashed border-ink/50 text-right`}>{korean.overall.ft2}%</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
           ))}
-          <DumbbellLegend />
+          <p className="mt-3 text-[12px] text-ink-mute">빨간 밑줄: 베이스라인보다 10%p 넘게 낮음</p>
           <p className="mt-4 text-ink-mute">
-            파인튜닝 모델은 주문 → 주문상품 → 상품 → 카테고리처럼 긴 경로에서 중간 테이블을 건너뛰었습니다. Spider에서 불필요한
-            JOIN을 줄여 준 버릇이 여기서는 독이 된 것으로 봅니다. 100문제 규모라 전체 차이(새로 맞음 {korean.flips.fixed}, 새로
-            틀림 {korean.flips.broken})는 통계적으로 유의하지 않습니다.
+            v1은 주문 → 주문상품 → 상품 → 카테고리처럼 긴 경로에서 중간 테이블을 건너뛰었습니다. Spider에서 불필요한 JOIN을
+            줄여 준 버릇이 여기서는 독이 된 것으로 봅니다.
+          </p>
+          <p className="mt-3 text-ink-mute">
+            v2는 쇼핑몰과 겹치지 않는 DB 4개({v2Data.dbs.split(" (")[0]})로 만든 한국어 질문 {v2Data.examples}개(그중 JOIN 2개
+            이상 {v2Data.multiJoin}개)를 Spider와 섞어 다시 학습했습니다. JOIN 2개 이상 문제는 2개에서 4개로 늘었지만
+            베이스라인(9개)에는 크게 못 미쳤고, 어려움 난이도는 그대로입니다. v1 대비 새로 맞음 {korean.flipsV2.fixed}, 새로
+            틀림 {korean.flipsV2.broken}으로 우연과 구분되지 않는 차이입니다.
           </p>
         </Segment>
 
-        <Segment title="학습 Loss" note={`${training.data} · ${training.setup}`}>
+        <Segment
+          title="학습 Loss"
+          note={`v1: ${training.data} · v2: ${v2Data.mix} · ${training.setup}. v2의 Loss가 낮은 건 규칙적인 템플릿 데이터가 섞여서이고, 실력 차이를 뜻하지 않습니다.`}
+        >
           <LossChart />
         </Segment>
 

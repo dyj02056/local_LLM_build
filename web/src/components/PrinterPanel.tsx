@@ -1,7 +1,7 @@
 ﻿import { Printer } from "@phosphor-icons/react";
 import { useId } from "react";
 import type { Database, Health, ModelKey } from "../api";
-import { MODEL_LABEL, type Mode } from "../types";
+import { MODEL_KEYS, MODEL_LABEL, type Mode } from "../types";
 
 type Props = {
   databases: Database[] | null;
@@ -20,16 +20,23 @@ type Props = {
 };
 
 const MODES: { id: Mode; label: string; hint: string }[] = [
-  { id: "base", label: MODEL_LABEL.base, hint: "qwen2.5-coder:3b" },
-  { id: "ft", label: MODEL_LABEL.ft, hint: "text2sql-ft" },
-  { id: "compare", label: "둘 다 비교", hint: "약 2배 시간" },
+  { id: "base", label: MODEL_LABEL.base, hint: "파인튜닝 전" },
+  { id: "ft", label: MODEL_LABEL.ft, hint: "Spider" },
+  { id: "ft2", label: MODEL_LABEL.ft2, hint: "Spider+한국어" },
+  { id: "compare", label: "모두 비교", hint: "설치된 모델 전부" },
 ];
 
 function modeUnavailable(m: Mode, health: Health | null): string | null {
   if (!health || !health.ollama) return null; // 연결 문제는 상태 띠에서 따로 알린다
-  const need: ModelKey[] = m === "compare" ? ["base", "ft"] : [m];
-  const missing = need.filter((k) => !health.models[k].installed).map((k) => health.models[k].name);
-  return missing.length ? `${missing.join(", ")} 모델이 Ollama에 없습니다` : null;
+  if (m === "compare") {
+    return compareKeys(health).length < 2 ? "비교하려면 모델이 2개 이상 Ollama에 있어야 합니다" : null;
+  }
+  return health.models[m].installed ? null : `${health.models[m].name} 모델이 Ollama에 없습니다`;
+}
+
+/** 비교 모드에서 인쇄할 모델: 설치된 것만 */
+export function compareKeys(health: Health | null): ModelKey[] {
+  return MODEL_KEYS.filter((k) => !health || health.models[k]?.installed);
 }
 
 export function PrinterPanel(p: Props) {
@@ -86,7 +93,7 @@ export function PrinterPanel(p: Props) {
 
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-sm font-semibold text-counter-ink">모델</legend>
-        <div className="grid grid-cols-3 rounded-md border border-counter-line bg-counter-2 p-1">
+        <div className="grid grid-cols-2 rounded-md border border-counter-line bg-counter-2 p-1 sm:grid-cols-4">
           {MODES.map((m) => {
             const active = p.mode === m.id;
             return (
@@ -173,7 +180,7 @@ export function PrinterPanel(p: Props) {
         className="flex h-13 cursor-pointer items-center justify-center gap-2.5 rounded-md bg-paper text-[17px] font-bold text-ink transition-[transform,background-color] duration-200 ease-out-expo hover:bg-paper-shade active:translate-y-px active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-counter-3 disabled:text-counter-mute"
       >
         <Printer size={22} weight="bold" aria-hidden />
-        {p.busy ? "인쇄 중" : p.mode === "compare" ? "두 장 인쇄" : "인쇄"}
+        {p.busy ? "인쇄 중" : p.mode === "compare" ? `${compareKeys(p.health).length}장 인쇄` : "인쇄"}
       </button>
     </form>
   );

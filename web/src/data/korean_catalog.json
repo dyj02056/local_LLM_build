@@ -4,699 +4,799 @@
   "level": "쉬움",
   "question": "고객은 모두 몇 명인가요?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 2,
   "level": "쉬움",
   "question": "서울에 사는 고객은 몇 명이야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 3,
   "level": "쉬움",
   "question": "가격이 10만 원 이상인 상품의 이름과 가격을 보여 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 4,
   "level": "쉬움",
   "question": "VIP 등급 고객들의 이름을 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 5,
   "level": "쉬움",
   "question": "재고가 하나도 없는 상품은 뭐야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 6,
   "level": "쉬움",
   "question": "가장 비싼 상품의 이름과 가격은?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 7,
   "level": "쉬움",
   "question": "전체 상품의 평균 가격은 얼마인가요?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 8,
   "level": "쉬움",
   "question": "취소된 주문은 몇 건이에요?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 9,
   "level": "쉬움",
   "question": "1990년 또는 그 이후에 태어난 여성 고객은 몇 명인가요?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 10,
   "level": "쉬움",
   "question": "'코딩출판' 브랜드 상품의 이름과 가격을 가격이 낮은 순서로 보여 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 11,
   "level": "보통",
   "question": "도시별 고객 수를 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 12,
   "level": "보통",
   "question": "등급별 고객 수를 많은 순서대로 보여 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 13,
   "level": "보통",
   "question": "전자제품 카테고리에 있는 상품 이름을 전부 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 14,
   "level": "보통",
   "question": "결제 수단별로 주문이 몇 건씩 있나요?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 15,
   "level": "보통",
   "question": "2025년 3월에 들어온 주문은 몇 건이야?",
   "base": false,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 16,
   "level": "보통",
   "question": "카테고리별 상품 수와 평균 가격을 구해 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 17,
   "level": "보통",
   "question": "리뷰 평균 평점이 4.5점 이상인 상품의 이름은?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 18,
   "level": "보통",
   "question": "한지우 고객은 주문을 몇 번 했어?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 19,
   "level": "보통",
   "question": "5점 리뷰를 한 번도 받지 못한 상품의 이름을 알려 줘.",
   "base": false,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 20,
   "level": "보통",
   "question": "평균 가격보다 비싼 상품들의 이름과 가격은?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 21,
   "level": "어려움",
   "question": "취소된 주문은 빼고, 매출(수량 × 주문 당시 가격의 합)이 가장 높은 상품의 이름과 매출을 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 22,
   "level": "어려움",
   "question": "취소된 주문을 제외하고 카테고리별 매출(수량 × 주문 당시 가격의 합)을 높은 순으로 보여 줘.",
   "base": true,
-  "ft": false
+  "ft": false,
+  "ft2": true
  },
  {
   "id": 23,
   "level": "어려움",
   "question": "2025년 상반기(1월~6월)에 주문한 적이 있는 서울 고객은 몇 명이야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": false
  },
  {
   "id": 24,
   "level": "어려움",
   "question": "한 번도 주문하지 않은 고객의 이름을 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 25,
   "level": "어려움",
   "question": "주문 건수가 가장 많은 고객의 이름과 주문 건수는?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 26,
   "level": "어려움",
   "question": "리뷰를 쓴 적도 있고 주문을 취소한 적도 있는 고객은 몇 명인가요?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 27,
   "level": "어려움",
   "question": "카드로 결제한 적은 있지만 간편결제는 한 번도 쓰지 않은 고객은 몇 명이야?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 28,
   "level": "어려움",
   "question": "VIP 고객들이 취소하지 않은 주문에서 가장 많이 산(수량 기준) 카테고리 이름은?",
   "base": true,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 29,
   "level": "어려움",
   "question": "평점 2점 이하인 리뷰가 가장 많이 달린 브랜드는 어디야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": false
  },
  {
   "id": 30,
   "level": "어려움",
   "question": "월별 주문 건수를 1월부터 순서대로 보여 줘. 월은 '01' 같은 두 자리 숫자로 표시해 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": false
  },
  {
   "id": 31,
   "level": "쉬움",
   "question": "판매 중인 상품은 모두 몇 개야?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 32,
   "level": "쉬움",
   "question": "제주에 사는 회원들 이름 좀 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 33,
   "level": "쉬움",
   "question": "남성 고객은 몇 명인가요?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 34,
   "level": "쉬움",
   "question": "나무공방 브랜드에서 파는 상품의 이름과 가격은?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 35,
   "level": "쉬움",
   "question": "2만 원보다 싼 상품 이름을 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 36,
   "level": "쉬움",
   "question": "제일 저렴한 상품은 뭐고 얼마야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 37,
   "level": "쉬움",
   "question": "지금까지 작성된 리뷰는 총 몇 개인가요?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 38,
   "level": "쉬움",
   "question": "별점 1점을 준 리뷰는 몇 개야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 39,
   "level": "쉬움",
   "question": "간편결제로 결제된 주문 수를 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 40,
   "level": "쉬움",
   "question": "재고가 100개 이상 남아 있는 상품은 몇 종류야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 41,
   "level": "쉬움",
   "question": "2024년에 가입한 고객 수는?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 42,
   "level": "쉬움",
   "question": "입점한 브랜드는 모두 몇 개인가요?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 43,
   "level": "쉬움",
   "question": "고객들이 사는 도시 목록을 중복 없이 보여 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 44,
   "level": "쉬움",
   "question": "가장 최근에 가입한 고객의 이름은?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 45,
   "level": "쉬움",
   "question": "지금 배송 중인 주문이 몇 건 있어?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 46,
   "level": "보통",
   "question": "브랜드마다 상품이 몇 개씩 있는지 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 47,
   "level": "보통",
   "question": "상품이 5개 이상인 카테고리의 이름은?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 48,
   "level": "보통",
   "question": "별점별 리뷰 개수를 1점부터 순서대로 보여 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 49,
   "level": "보통",
   "question": "성별에 따른 평균 출생연도를 구해 줘.",
   "base": false,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 50,
   "level": "보통",
   "question": "주문 상태별 건수를 많은 순으로 정리해 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 51,
   "level": "보통",
   "question": "스마트워치의 평균 별점은 몇 점이야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 52,
   "level": "보통",
   "question": "강지우 고객이 작성한 리뷰는 몇 개인가요?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 53,
   "level": "보통",
   "question": "의류 카테고리 상품의 평균 가격은 얼마야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 54,
   "level": "보통",
   "question": "2025년 12월에 주문한 고객들의 이름을 중복 없이 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 55,
   "level": "보통",
   "question": "모든 상품의 이름과 그 상품이 속한 카테고리 이름을 보여 줘.",
   "base": true,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 56,
   "level": "보통",
   "question": "가격이 가장 비싼 상품 3개의 이름과 가격을 비싼 순으로 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 57,
   "level": "보통",
   "question": "회원 등급별 평균 출생연도는?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 58,
   "level": "보통",
   "question": "한 주문에서 3개 이상 한꺼번에 팔린 적이 있는 상품의 이름을 중복 없이 알려 줘.",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": true
  },
  {
   "id": 59,
   "level": "보통",
   "question": "카테고리별 재고 수량 합계를 구해 줘.",
   "base": true,
-  "ft": false
+  "ft": false,
+  "ft2": true
  },
  {
   "id": 60,
   "level": "보통",
   "question": "결제 수단별로 취소된 주문이 몇 건인지 보여 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 61,
   "level": "보통",
   "question": "5점 리뷰를 10개 이상 받은 상품은?",
   "base": false,
-  "ft": true
+  "ft": true,
+  "ft2": false
  },
  {
   "id": 62,
   "level": "보통",
   "question": "고객이 가장 많이 사는 도시는 어디야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 63,
   "level": "보통",
   "question": "1980년대에 태어난 고객은 몇 명인가요?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 64,
   "level": "보통",
   "question": "리뷰를 한 번도 안 쓴 고객은 몇 명이야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 65,
   "level": "보통",
   "question": "현재 상품 가격보다 싸게 팔린 주문 상품 내역은 몇 건이야?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": true
  },
  {
   "id": 66,
   "level": "보통",
   "question": "가장 비싼 상품과 가장 싼 상품의 가격 차이는 얼마야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 67,
   "level": "보통",
   "question": "대구 회원들이 넣은 주문은 모두 몇 건이야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 68,
   "level": "보통",
   "question": "상품 평균 가격이 10만 원 이상인 브랜드는?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 69,
   "level": "보통",
   "question": "2025년 2분기(4월~6월) 주문 건수를 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 70,
   "level": "보통",
   "question": "도서 카테고리에서 재고가 50개 미만인 책 제목을 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 71,
   "level": "어려움",
   "question": "취소된 주문을 빼고, 부산 고객들이 수량 기준으로 가장 많이 산 브랜드는?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 72,
   "level": "어려움",
   "question": "결제 수단별 취소율(취소 건수 ÷ 전체 주문 건수)을 0과 1 사이 값으로 구해 줘.",
   "base": true,
-  "ft": false
+  "ft": false,
+  "ft2": true
  },
  {
   "id": 73,
   "level": "어려움",
   "question": "취소 주문을 제외한 매출(수량 × 주문 당시 가격) 기준 상위 3개 브랜드와 각 매출을 높은 순으로 보여 줘.",
   "base": true,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 74,
   "level": "어려움",
   "question": "2025년 12월 31일 기준으로 마지막 주문일로부터 90일이 넘게 지난 고객은 몇 명이야? (주문한 적이 있는 고객만)",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 75,
   "level": "어려움",
   "question": "1990년대생 여성 골드 회원의 이름을 알려 줘.",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 76,
   "level": "어려움",
   "question": "리뷰를 3개 이상 남긴 고객의 이름과 리뷰 수를 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 77,
   "level": "어려움",
   "question": "리뷰 평균 별점이 가장 낮은 카테고리는 어디야?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": false
  },
  {
   "id": 78,
   "level": "어려움",
   "question": "VIP 고객이 한 번도 주문한 적 없는 상품의 이름을 알려 줘. (취소된 주문도 주문한 것으로 봄)",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 79,
   "level": "어려움",
   "question": "취소 주문을 빼고, 회원 등급별로 주문 1건당 평균 주문 금액을 구해 줘.",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 80,
   "level": "어려움",
   "question": "주문 금액(수량 × 주문 당시 가격의 합)이 가장 큰 주문의 주문 번호와 금액은?",
   "base": false,
-  "ft": true
+  "ft": true,
+  "ft2": false
  },
  {
   "id": 81,
   "level": "어려움",
   "question": "같은 상품을 서로 다른 주문에서 2번 이상 주문한 적이 있는 고객은 몇 명이야?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 82,
   "level": "어려움",
   "question": "자기 상품의 평균 별점보다 높은 별점을 준 리뷰는 몇 개야?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 83,
   "level": "어려움",
   "question": "취소 주문을 빼고 매출이 가장 높았던 달은 몇 월이야? '07'처럼 두 자리로 알려 줘.",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 84,
   "level": "어려움",
   "question": "전체 평균 가격보다 비싼 상품을 한 번이라도 주문한 고객은 몇 명이야?",
   "base": true,
-  "ft": false
+  "ft": false,
+  "ft2": true
  },
  {
   "id": 85,
   "level": "어려움",
   "question": "서울 고객과 부산 고객이 각각 주문을 몇 건 했는지 비교해 줘.",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 86,
   "level": "어려움",
   "question": "전자제품과 가구를 둘 다 주문한 적이 있는 고객은 몇 명이야?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 87,
   "level": "어려움",
   "question": "리뷰가 10개 이상 달린 상품 중에서 평균 별점이 가장 높은 3개의 이름과 평균 별점을 높은 순으로 알려 줘.",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 88,
   "level": "어려움",
   "question": "카테고리마다 가장 비싼 상품의 이름과 가격을 보여 줘. (카테고리 이름, 상품 이름, 가격 순)",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 89,
   "level": "어려움",
   "question": "주문은 해 봤지만 리뷰는 한 번도 안 쓴 고객은 몇 명인가요?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 90,
   "level": "어려움",
   "question": "2025년 하반기(7~12월) 주문 건수가 상반기(1~6월)보다 많은 고객은 몇 명이야?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 91,
   "level": "어려움",
   "question": "취소를 제외한 판매 수량 합계가 현재 재고보다 많은 상품의 이름은?",
   "base": true,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 92,
   "level": "어려움",
   "question": "평균 별점이 4점 이상이면서 가격이 5만 원 이하인 상품의 이름을 알려 줘.",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 93,
   "level": "어려움",
   "question": "취소 주문을 빼고 총 구매 금액이 가장 큰 고객 3명의 이름과 금액을 높은 순으로 보여 줘.",
   "base": true,
-  "ft": false
+  "ft": false,
+  "ft2": true
  },
  {
   "id": 94,
   "level": "어려움",
   "question": "가입 연도별 고객 수를 연도 순으로 보여 줘. 연도는 '2023'처럼 네 자리로.",
   "base": true,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 95,
   "level": "어려움",
   "question": "소리샘 브랜드 상품을 산 적이 있는 고객 수를 도시별로 알려 줘.",
   "base": true,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 96,
   "level": "어려움",
   "question": "계좌이체로만 결제하고 다른 결제 수단은 한 번도 쓰지 않은 고객은 몇 명이야?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  },
  {
   "id": 97,
   "level": "어려움",
   "question": "브랜드별 평균 별점이 전체 리뷰 평균 별점보다 낮은 브랜드는?",
   "base": true,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 98,
   "level": "어려움",
   "question": "서로 다른 상품 3개가 담긴 주문은 몇 건이야?",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": true
  },
  {
   "id": 99,
   "level": "어려움",
   "question": "골드나 VIP 등급 고객 중에서 주문을 취소한 적이 있는 사람의 이름을 중복 없이 알려 줘.",
   "base": false,
-  "ft": true
+  "ft": true,
+  "ft2": true
  },
  {
   "id": 100,
   "level": "어려움",
   "question": "취소 주문을 빼고, 전체 매출 중 의류 매출이 차지하는 비율을 0과 1 사이 값으로 구해 줘.",
   "base": false,
-  "ft": false
+  "ft": false,
+  "ft2": false
  }
 ]

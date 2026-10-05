@@ -1,8 +1,13 @@
 import { useMemo, useState } from "react";
-import catalog from "../data/korean_catalog.json";
+import type { ModelKey } from "../api";
+import rawCatalog from "../data/korean_catalog.json";
+import { MODEL_KEYS, MODEL_LABEL } from "../types";
 
-type Item = (typeof catalog)[number];
+type Item = { id: number; level: string; question: string } & Partial<Record<ModelKey, boolean>>;
+const catalog = rawCatalog as Item[];
 const LEVELS = ["전체", "쉬움", "보통", "어려움"] as const;
+// 실측 결과가 있는 모델만 (내보낸 데이터 기준)
+const MEASURED = MODEL_KEYS.filter((k) => catalog.some((c) => c[k] !== undefined));
 
 /** 정답은 실선, 오답은 점선. 색이 아니라 인쇄 모양으로 구분한다. */
 function Mark({ ok, label }: { ok: boolean; label: string }) {
@@ -15,17 +20,14 @@ function Mark({ ok, label }: { ok: boolean; label: string }) {
 }
 
 function verdict(item: Item) {
-  const b = item.base ? "정답" : "오답";
-  const f = item.ft ? "정답" : "오답";
-  return `베이스라인 ${b} · 파인튜닝 ${f}`;
+  return MEASURED.map((k) => `${MODEL_LABEL[k]} ${item[k] ? "정답" : "오답"}`).join(" · ");
 }
 
 export function Catalog({ selectedId, onPick }: { selectedId: number | null; onPick: (item: Item) => void }) {
   const [level, setLevel] = useState<(typeof LEVELS)[number]>("전체");
   const [peek, setPeek] = useState<Item | null>(null);
   const items = useMemo(() => (level === "전체" ? catalog : catalog.filter((c) => c.level === level)), [level]);
-  const baseScore = items.filter((c) => c.base).length;
-  const ftScore = items.filter((c) => c.ft).length;
+  const scores = MEASURED.map((k) => ({ k, n: items.filter((c) => c[k]).length }));
   const shown = peek ?? catalog.find((c) => c.id === selectedId) ?? null;
 
   return (
@@ -53,8 +55,12 @@ export function Catalog({ selectedId, onPick }: { selectedId: number | null; onP
       </div>
 
       <p className="font-receipt text-[13px] text-counter-mute">
-        {level} {items.length}문제 실측 · 베이스라인 <span className="text-counter-ink">{baseScore}</span> · 파인튜닝{" "}
-        <span className="text-counter-ink">{ftScore}</span>
+        {level} {items.length}문제 실측
+        {scores.map(({ k, n }) => (
+          <span key={k}>
+            {" "}· {MODEL_LABEL[k]} <span className="text-counter-ink">{n}</span>
+          </span>
+        ))}
       </p>
 
       <ol className="grid grid-cols-10 gap-1" onMouseLeave={() => setPeek(null)}>
@@ -78,8 +84,9 @@ export function Catalog({ selectedId, onPick }: { selectedId: number | null; onP
               >
                 <span className="self-start">{item.id}</span>
                 <span className="flex w-full gap-[3px]" aria-hidden>
-                  <Mark ok={item.base} label="베이스라인" />
-                  <Mark ok={item.ft} label="파인튜닝" />
+                  {MEASURED.map((k) => (
+                    <Mark key={k} ok={!!item[k]} label={MODEL_LABEL[k]} />
+                  ))}
                 </span>
               </button>
             </li>
@@ -97,8 +104,8 @@ export function Catalog({ selectedId, onPick }: { selectedId: number | null; onP
           </>
         ) : (
           <p className="text-sm leading-relaxed text-counter-mute">
-            칸 아래 막대는 실측 채점 결과입니다. 왼쪽은 베이스라인, 오른쪽은 파인튜닝이고 실선이 정답, 점선이 오답입니다. 칸을
-            누르면 질문이 입력됩니다.
+            칸 아래 막대는 실측 채점 결과입니다. 왼쪽부터 {MEASURED.map((k) => MODEL_LABEL[k]).join(", ")} 순서이고 실선이
+            정답, 점선이 오답입니다. 칸을 누르면 질문이 입력됩니다.
           </p>
         )}
       </div>

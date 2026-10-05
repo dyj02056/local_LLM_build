@@ -29,6 +29,10 @@ services:
         set -e
         ollama pull qwen2.5-coder:3b
         cd /models && ollama create text2sql-ft -f Modelfile
+        # v2 GGUF가 있으면 함께 등록 (없으면 화면에서 v2 선택지가 비활성화됨)
+        if ls /models/v2/*.gguf >/dev/null 2>&1; then
+          cd /models/v2 && ollama create text2sql-ft-v2 -f Modelfile
+        fi
 
   app:
     build: .

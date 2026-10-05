@@ -1,0 +1,212 @@
+[
+  {
+    "id": 1,
+    "level": "쉬움",
+    "question": "VIP 등급 회원 수 몇 명이에요?",
+    "query": "SELECT COUNT(*) FROM customers WHERE grade = 'VIP';",
+    "note": "회원은 customers 테이블의 전체 고객을 의미함"
+  },
+  {
+    "id": 2,
+    "level": "쉬움",
+    "question": "재고가 10개 미만으로 남은 상품의 이름이랑 재고 수량 알려줘",
+    "query": "SELECT name, stock FROM products WHERE stock < 10;",
+    "note": ""
+  },
+  {
+    "id": 3,
+    "level": "쉬움",
+    "question": "서울 사는 여성 회원들의 이름과 가입일 조회해줘",
+    "query": "SELECT name, joined_at FROM customers WHERE city = '서울' AND gender = 'F';",
+    "note": ""
+  },
+  {
+    "id": 4,
+    "level": "쉬움",
+    "question": "현재 판매가가 10만원 이상인 상품 이름이랑 가격 목록 보여주세요",
+    "query": "SELECT name, price FROM products WHERE price >= 100000;",
+    "note": ""
+  },
+  {
+    "id": 5,
+    "level": "쉬움",
+    "question": "결제 수단이 간편결제인 주문 건수 총 몇 건인가요?",
+    "query": "SELECT COUNT(*) FROM orders WHERE payment_method = '간편결제';",
+    "note": ""
+  },
+  {
+    "id": 6,
+    "level": "쉬움",
+    "question": "상태가 취소로 들어온 주문의 주문 번호랑 주문 날짜 다 뽑아주세요",
+    "query": "SELECT order_id, order_date FROM orders WHERE status = '취소';",
+    "note": ""
+  },
+  {
+    "id": 7,
+    "level": "쉬움",
+    "question": "등록된 상품들의 평균 판매가는 얼마인가요?",
+    "query": "SELECT AVG(price) FROM products;",
+    "note": "products 테이블의 price(현재 판매가) 평균을 계산함"
+  },
+  {
+    "id": 8,
+    "level": "쉬움",
+    "question": "1980년 이후에 출생한 고객 이름과 출생연도 목록 뽑아줘",
+    "query": "SELECT name, birth_year FROM customers WHERE birth_year >= 1980;",
+    "note": ""
+  },
+  {
+    "id": 9,
+    "level": "보통",
+    "question": "각 등급별로 회원이 몇 명씩 있는지 등급명과 회원 수 보여주세요",
+    "query": "SELECT grade, COUNT(*) FROM customers GROUP BY grade;",
+    "note": ""
+  },
+  {
+    "id": 10,
+    "level": "보통",
+    "question": "전자제품 카테고리에 속한 상품의 이름과 현재 판매가 알려줘",
+    "query": "SELECT p.name, p.price FROM products p JOIN categories c ON p.category_id = c.category_id WHERE c.name = '전자제품';",
+    "note": ""
+  },
+  {
+    "id": 11,
+    "level": "보통",
+    "question": "도시별 회원 수를 회원 수 많은 순으로 도시명과 회원 수 출력해줘",
+    "query": "SELECT city, COUNT(*) FROM customers GROUP BY city ORDER BY COUNT(*) DESC;",
+    "note": ""
+  },
+  {
+    "id": 12,
+    "level": "보통",
+    "question": "결제 완료 상태인 주문을 고객별로 집계해서 고객 ID와 주문 건수를 주문 건수 많은 순으로 보여줘",
+    "query": "SELECT customer_id, COUNT(*) FROM orders WHERE status = '결제완료' GROUP BY customer_id ORDER BY COUNT(*) DESC;",
+    "note": ""
+  },
+  {
+    "id": 13,
+    "level": "보통",
+    "question": "각 카테고리별로 등록된 상품이 몇 개씩 있는지 카테고리 이름과 상품 수를 보여주세요",
+    "query": "SELECT c.name, COUNT(*) FROM products p JOIN categories c ON p.category_id = c.category_id GROUP BY c.category_id, c.name;",
+    "note": ""
+  },
+  {
+    "id": 14,
+    "level": "보통",
+    "question": "주문 결제 수단별로 총 몇 건이 주문되었는지 결제 수단과 주문 건수 뽑아줘",
+    "query": "SELECT payment_method, COUNT(*) FROM orders GROUP BY payment_method;",
+    "note": "취소 포함 전체 주문 수량 집계"
+  },
+  {
+    "id": 15,
+    "level": "보통",
+    "question": "리뷰 평점이 5점인 리뷰가 작성된 상품 ID와 총 리뷰 수 알려주세요",
+    "query": "SELECT product_id, COUNT(*) FROM reviews WHERE rating = 5 GROUP BY product_id;",
+    "note": ""
+  },
+  {
+    "id": 16,
+    "level": "보통",
+    "question": "등록된 상품 수가 3개 이상인 브랜드 이름과 상품 수를 출력해줘",
+    "query": "SELECT brand, COUNT(*) FROM products GROUP BY brand HAVING COUNT(*) >= 3;",
+    "note": ""
+  },
+  {
+    "id": 17,
+    "level": "보통",
+    "question": "고객별 작성한 리뷰 개수를 집계해서, 리뷰를 3개 이상 작성한 고객 ID와 리뷰 수 보여줘",
+    "query": "SELECT customer_id, COUNT(*) FROM reviews GROUP BY customer_id HAVING COUNT(*) >= 3;",
+    "note": ""
+  },
+  {
+    "id": 18,
+    "level": "보통",
+    "question": "2025년에 가입한 회원들의 이름과 가입일 조회해줘",
+    "query": "SELECT name, joined_at FROM customers WHERE joined_at >= '2025-01-01' AND joined_at <= '2025-12-31';",
+    "note": ""
+  },
+  {
+    "id": 19,
+    "level": "어려움",
+    "question": "취소 건을 제외하고(배송완료, 배송중, 결제완료) 각 카테고리별 총 매출 금액(수량 × 주문 당시 가격)을 카테고리 이름과 매출액으로 보여줘. 매출 높은 순으로 정렬해줘.",
+    "query": "SELECT c.name, SUM(oi.quantity * oi.unit_price) FROM order_items oi JOIN orders o ON oi.order_id = o.order_id JOIN products p ON oi.product_id = p.product_id JOIN categories c ON p.category_id = c.category_id WHERE o.status != '취소' GROUP BY c.category_id, c.name ORDER BY SUM(oi.quantity * oi.unit_price) DESC;",
+    "note": "4개 테이블 JOIN (order_items - orders - products - categories)"
+  },
+  {
+    "id": 20,
+    "level": "어려움",
+    "question": "취소된 주문을 제외하고 가장 총 구매 금액(수량 × 주문 당시 가격)이 높은 상위 5명 회원의 고객 이름과 총 구매 금액을 알려줘",
+    "query": "SELECT c.name, SUM(oi.quantity * oi.unit_price) FROM order_items oi JOIN orders o ON oi.order_id = o.order_id JOIN customers c ON o.customer_id = c.customer_id WHERE o.status != '취소' GROUP BY c.customer_id, c.name ORDER BY SUM(oi.quantity * oi.unit_price) DESC LIMIT 5;",
+    "note": "3개 테이블 JOIN 및 TOP 5 정렬"
+  },
+  {
+    "id": 21,
+    "level": "어려움",
+    "question": "취소 건을 제외했을 때, 브랜드별 총 판매 수량(주문 수량 합계)을 브랜드명과 판매 수량으로 판매 많은 순으로 정렬해서 보여줘",
+    "query": "SELECT p.brand, SUM(oi.quantity) FROM order_items oi JOIN orders o ON oi.order_id = o.order_id JOIN products p ON oi.product_id = p.product_id WHERE o.status != '취소' GROUP BY p.brand ORDER BY SUM(oi.quantity) DESC;",
+    "note": "3개 테이블 JOIN (order_items - orders - products)"
+  },
+  {
+    "id": 22,
+    "level": "어려움",
+    "question": "서울 거주 고객들이 취소건 제외하고 실제로 구매한 총 금액(수량 × 주문 당시 가격)은 얼마인가요?",
+    "query": "SELECT SUM(oi.quantity * oi.unit_price) FROM order_items oi JOIN orders o ON oi.order_id = o.order_id JOIN customers c ON o.customer_id = c.customer_id WHERE c.city = '서울' AND o.status != '취소';",
+    "note": "3개 테이블 JOIN"
+  },
+  {
+    "id": 23,
+    "level": "어려움",
+    "question": "VIP 등급 고객들이 주문한 상품명과 총 주문 수량을 수량 많은 순으로 뽑아주세요 (취소 건 제외)",
+    "query": "SELECT p.name, SUM(oi.quantity) FROM order_items oi JOIN orders o ON oi.order_id = o.order_id JOIN customers c ON o.customer_id = c.customer_id JOIN products p ON oi.product_id = p.product_id WHERE c.grade = 'VIP' AND o.status != '취소' GROUP BY p.product_id, p.name ORDER BY SUM(oi.quantity) DESC;",
+    "note": "4개 테이블 JOIN (customers - orders - order_items - products)"
+  },
+  {
+    "id": 24,
+    "level": "어려움",
+    "question": "남성 회원과 여성 회원 각각의 취소 제외 실구매 총액(수량 × 주문 당시 가격)을 성별과 총 금액으로 보여줘",
+    "query": "SELECT c.gender, SUM(oi.quantity * oi.unit_price) FROM order_items oi JOIN orders o ON oi.order_id = o.order_id JOIN customers c ON o.customer_id = c.customer_id WHERE o.status != '취소' GROUP BY c.gender;",
+    "note": "3개 테이블 JOIN"
+  },
+  {
+    "id": 25,
+    "level": "어려움",
+    "question": "기준일 2025년 12월 31일 기준 최근 30일(2025-12-02 ~ 2025-12-31) 동안 취소건을 제외하고 판매된 상품의 카테고리 이름과 총 판매 수량을 수량 많은 순으로 정렬해줘",
+    "query": "SELECT c.name, SUM(oi.quantity) FROM order_items oi JOIN orders o ON oi.order_id = o.order_id JOIN products p ON oi.product_id = p.product_id JOIN categories c ON p.category_id = c.category_id WHERE o.order_date BETWEEN '2025-12-02' AND '2025-12-31' AND o.status != '취소' GROUP BY c.category_id, c.name ORDER BY SUM(oi.quantity) DESC;",
+    "note": "4개 테이블 JOIN 및 날짜 범위 조건 적용"
+  },
+  {
+    "id": 26,
+    "level": "어려움",
+    "question": "취소 제외 총 판매 금액(수량 × 주문 당시 가격)이 500만원 이상인 상품의 상품명과 총 판매 금액을 판매 금액 큰 순으로 보여주세요",
+    "query": "SELECT p.name, SUM(oi.quantity * oi.unit_price) FROM order_items oi JOIN orders o ON oi.order_id = o.order_id JOIN products p ON oi.product_id = p.product_id WHERE o.status != '취소' GROUP BY p.product_id, p.name HAVING SUM(oi.quantity * oi.unit_price) >= 5000000 ORDER BY SUM(oi.quantity * oi.unit_price) DESC;",
+    "note": "3개 테이블 JOIN + HAVING 집계 조건"
+  },
+  {
+    "id": 27,
+    "level": "어려움",
+    "question": "상품을 구매(취소건 제외)한 적이 있으면서 동시에 상품 리뷰도 작성한 적이 있는 고객의 ID 목록을 조회해줘",
+    "query": "SELECT DISTINCT customer_id FROM orders WHERE status != '취소' INTERSECT SELECT DISTINCT customer_id FROM reviews;",
+    "note": "INTERSECT 집합 연산자 활용"
+  },
+  {
+    "id": 28,
+    "level": "어려움",
+    "question": "한 번이라도 주문을 해본 고객 중 취소 건을 제외한 총 구매 금액(수량 × 주문 당시 가격)이 전체 고객의 평균 실구매 금액보다 높은 고객의 ID와 총 구매 금액을 구매 금액 순으로 보여줘",
+    "query": "SELECT o.customer_id, SUM(oi.quantity * oi.unit_price) FROM order_items oi JOIN orders o ON oi.order_id = o.order_id WHERE o.status != '취소' GROUP BY o.customer_id HAVING SUM(oi.quantity * oi.unit_price) > (SELECT AVG(user_total) FROM (SELECT SUM(oi2.quantity * oi2.unit_price) AS user_total FROM order_items oi2 JOIN orders o2 ON oi2.order_id = o2.order_id WHERE o2.status != '취소' GROUP BY o2.customer_id)) ORDER BY SUM(oi.quantity * oi.unit_price) DESC;",
+    "note": "서브쿼리를 활용한 평균값 비교"
+  },
+  {
+    "id": 29,
+    "level": "어려움",
+    "question": "상품 중 평균 리뷰 평점이 4.5 이상인 상품의 ID, 상품명, 평균 평점을 평점 높은 순으로 보여줘",
+    "query": "SELECT p.product_id, p.name, AVG(r.rating) FROM reviews r JOIN products p ON r.product_id = p.product_id GROUP BY p.product_id, p.name HAVING AVG(r.rating) >= 4.5 ORDER BY AVG(r.rating) DESC;",
+    "note": "2개 테이블 JOIN + HAVING 조건"
+  },
+  {
+    "id": 30,
+    "level": "어려움",
+    "question": "뷰티 카테고리 상품을 단 한 번도 주문(취소 포함 전체 주문 기준)하지 않은 고객의 ID와 이름 목록을 출력해줘",
+    "query": "SELECT customer_id, name FROM customers WHERE customer_id NOT IN (SELECT DISTINCT o.customer_id FROM orders o JOIN order_items oi ON o.order_id = oi.order_id JOIN products p ON oi.product_id = p.product_id JOIN categories c ON p.category_id = c.category_id WHERE c.name = '뷰티');",
+    "note": "서브쿼리 NOT IN 활용"
+  }
+]
