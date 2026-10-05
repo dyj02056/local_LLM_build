@@ -21,7 +21,8 @@ Set-Location $Root
 # 이 프로젝트가 PC의 Ollama에 등록한 모델만
 $OllamaModels = @("text2sql-ft", "text2sql-ft-v2", "qwen2.5-coder:3b")
 $Folders = @{
-    data = @("data\spider", "data\sft", "data\korean\database", "data\korean\dev_ko.jsonl", "data\korean_train", "outputs")
+    # outputs/(평가 결과)는 다시 만들려면 몇 시간이 걸려서 지우지 않는다
+    data = @("data\spider", "data\sft", "data\korean\database", "data\korean\dev_ko.jsonl", "data\korean\dev_ext.jsonl", "data\korean_train")
     deps = @(".venv", "web\node_modules", "web\dist")
 }
 
