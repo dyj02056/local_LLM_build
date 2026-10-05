@@ -1,0 +1,49 @@
+// README의 실측 결과. 숫자를 바꿀 때는 README와 함께 바꾼다.
+
+export const spider = {
+  total: 1034,
+  rows: [
+    { label: "베이스라인", ex: 61.8, err: 13.4, lat: 5.52 },
+    { label: "베이스라인 + 자동수정", ex: 62.6, err: 10.3, lat: 7.57 },
+    { label: "파인튜닝", ex: 73.4, err: 6.1, lat: 5.04 },
+    { label: "파인튜닝 + 자동수정", ex: 74.4, err: 3.6, lat: 5.97 },
+  ],
+  byType: [
+    { type: "단순 조회", n: 333, base: 78.1, ft: 88.3 },
+    { type: "ORDER BY", n: 237, base: 62.4, ft: 74.7 },
+    { type: "GROUP BY", n: 277, base: 51.6, ft: 66.4 },
+    { type: "JOIN", n: 408, base: 51.2, ft: 59.6 },
+    { type: "집합 연산", n: 80, base: 43.8, ft: 58.8 },
+    { type: "중첩 쿼리", n: 83, base: 37.3, ft: 50.6 },
+  ],
+  flips: { fixed: 176, broken: 56, z: 7.9 },
+};
+
+export const selfCorrection = [
+  { label: "오류 메시지만 (기본)", fixedRun: 26, fixedRight: 10, repeated: 25, ex: 74.4, lat: 5.97 },
+  { label: "+ 컬럼 목록 힌트", fixedRun: 17, fixedRight: 7, repeated: 38, ex: 74.1, lat: 6.38 },
+  { label: "+ 힌트 + 재샘플링", fixedRun: 22, fixedRight: 8, repeated: 31, ex: 74.2, lat: 6.66 },
+];
+
+export const korean = {
+  total: 100,
+  overall: { base: 71, ft: 66 },
+  byLevel: [
+    { level: "쉬움", n: 25, base: 24, ft: 24 },
+    { level: "보통", n: 35, base: 27, ft: 29 },
+    { level: "어려움", n: 40, base: 20, ft: 13 },
+  ],
+  byJoins: [
+    { joins: "0개", n: 58, base: 43, ft: 45 },
+    { joins: "1개", n: 28, base: 19, ft: 19 },
+    { joins: "2개 이상", n: 14, base: 9, ft: 2 },
+  ],
+  flips: { fixed: 6, broken: 11, z: -1.2 },
+};
+
+export const training = {
+  data: "Spider train 8,659문제 · 1 epoch",
+  setup: "4bit QLoRA · r=16 · lr 2e-4 · Colab T4",
+  lossStart: 0.404,
+  lossEnd: 0.08,
+};

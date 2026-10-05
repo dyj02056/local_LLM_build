@@ -1,0 +1,138 @@
+@import "tailwindcss";
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
+@import "@fontsource/nanum-gothic-coding/400.css";
+@import "@fontsource/nanum-gothic-coding/700.css";
+
+@theme {
+  /* 계산대(화면 바탕) */
+  --color-counter: #24272b;
+  --color-counter-2: #2d3136;
+  --color-counter-3: #363b41;
+  --color-counter-line: #454b52;
+  --color-counter-ink: #eceae6;
+  --color-counter-mute: #a9adb3;
+  --color-slot: #15171a; /* 프린터 출력구 */
+
+  /* 감열지 영수증 */
+  --color-paper: #f3f3f0;
+  --color-paper-shade: #e3e3de;
+  --color-ink: #26272a;
+  --color-ink-mute: #64656a;
+  --color-thermal: #c23a2b;
+  --color-thermal-soft: #f0a093; /* 어두운 계산대 위 오류 문구 */
+
+  --font-sans: "Pretendard Variable", Pretendard, system-ui, sans-serif;
+  --font-receipt: "Nanum Gothic Coding", ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--color-counter);
+    color: var(--color-counter-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "tnum" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: var(--color-thermal);
+    color: var(--color-paper);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-counter-ink);
+    outline-offset: 2px;
+  }
+  textarea,
+  input {
+    caret-color: var(--color-thermal);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-counter-line) transparent;
+  }
+  a {
+    text-underline-offset: 3px;
+  }
+}
+
+/* 영수증 종이: 아래쪽은 절취선(톱니) 모양 */
+.receipt-paper {
+  --tooth: 8px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-receipt);
+  font-feature-settings: "tnum" 1;
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--tooth)) no-repeat,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(var(--tooth) * 2) var(--tooth) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--tooth)) no-repeat,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(var(--tooth) * 2) var(--tooth) repeat-x;
+  filter: drop-shadow(0 10px 18px rgb(10 12 14 / 0.35));
+}
+.receipt-paper ::selection {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+.receipt-paper :focus-visible {
+  outline-color: var(--color-ink);
+}
+.receipt-paper * {
+  scrollbar-color: var(--color-paper-shade) transparent;
+}
+
+/* 점선 구분선: 감열 프린터가 찍는 '-' 줄 */
+.rule-dash {
+  border-top: 1.5px dashed currentColor;
+  opacity: 0.55;
+}
+.rule-double {
+  border-top: 3px double currentColor;
+}
+
+/* 점선 리더: 항목 ....... 값 */
+.leader {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5ch;
+}
+.leader::after {
+  content: "";
+  order: 1;
+  flex: 1;
+  border-bottom: 1.5px dotted currentColor;
+  opacity: 0.45;
+  transform: translateY(-0.25em);
+}
+.leader > :last-child {
+  order: 2;
+}
+
+/* 2배 높이 인쇄: 글자 폭은 그대로, 높이만 두 배 (감열 프린터의 강조 방식) */
+.dh {
+  display: inline-block;
+  transform: scaleY(2);
+  transform-origin: center;
+  margin-block: 0.55em;
+}
+
+/* 아직 인쇄 중인 줄: 점선 인쇄 */
+.pending-line {
+  height: 0.7em;
+  background: radial-gradient(circle, var(--color-ink) 1.1px, transparent 1.4px) left center / 6px 6px repeat-x;
+  opacity: 0.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,47 @@
+# docker compose up --build
+# 처음 한 번은 베이스라인 모델 다운로드(약 2GB)와 파인튜닝 모델 등록 때문에 몇 분 걸린다.
+# 준비물: models/ 에 Qwen2.5-Coder-3B-Instruct.Q4_K_M.gguf 와 Modelfile (README 3번 참고)
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # 모델 준비: 베이스라인 pull + 파인튜닝 GGUF 등록 (이미 있으면 빠르게 끝남)
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: ollama:11434
+    volumes:
+      - ./models:/models:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        ollama pull qwen2.5-coder:3b
+        cd /models && ollama create text2sql-ft -f Modelfile
+
+  app:
+    build: .
+    depends_on:
+      ollama-init:
+        condition: service_completed_successfully
+    environment:
+      OLLAMA_URL: http://ollama:11434
+    volumes:
+      # Spider DB는 있으면 함께 쓴다 (없으면 한국어 쇼핑몰 DB만 보임)
+      - ./data/spider:/app/data/spider:ro
+    ports:
+      - "8000:8000"
+
+volumes:
+  ollama:

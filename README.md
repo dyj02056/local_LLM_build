@@ -163,10 +163,14 @@ scripts/
   plot_loss.py        Colab 학습 로그 → Loss 그래프 (pip install -e ".[plot]")
   build_shop_db.py    한국어 평가용 가상 쇼핑몰 DB 생성
   prepare_korean.py   한국어 질문 검증 → 평가용 JSONL
+  export_demo_data.py 화면에 보여 줄 실측 데이터 → web/src/data/
 data/korean/questions.json  한국어 질문 100개 + 정답 SQL
 train/finetune_unsloth.py   Colab T4용 QLoRA 학습 → GGUF 변환
-app/main.py                 FastAPI 서버 (/query, /schema, /databases)
-tests/                      실행기 보안·평가 로직 테스트
+app/main.py                 FastAPI 서버 (/api/query, /api/health, /api/databases, /api/schema) + 화면 제공
+web/                        데모 화면 (React + Vite + Tailwind)
+models/Modelfile            파인튜닝 GGUF를 Ollama에 등록하는 설정
+tests/                      실행기 보안·평가 로직·API 테스트
+Dockerfile, docker-compose.yml   Ollama + API + 화면을 한 번에 실행
 ```
 
 ## 실행 방법
@@ -213,12 +217,36 @@ python scripts/evaluate.py outputs/preds_ko-ft-3b.jsonl --db-root data/korean/da
 python scripts/compare.py outputs/preds_ko-base-3b_eval.jsonl outputs/preds_ko-ft-3b_eval.jsonl --levels data/korean/questions.json
 ```
 
-### 5. API 서버
+### 5. 데모 화면 (로컬)
 ```bash
-set TEXT2SQL_MODEL=text2sql-ft
-uvicorn app.main:app --reload
+cd web
+npm install
+npm run build
+cd ..
+uvicorn app.main:app
 ```
-`http://localhost:8000/docs`에서 테스트할 수 있습니다.
+`http://localhost:8000`에서 데모를, `http://localhost:8000/docs`에서 API를 볼 수 있습니다.
+화면을 고치면서 볼 때는 `uvicorn`을 켜 둔 채 `web/`에서 `npm run dev`를 실행하고 `http://localhost:5173`을 엽니다.
+
+환경변수: `BASE_MODEL`(기본 `qwen2.5-coder:3b`), `FT_MODEL`(기본 `text2sql-ft`), `OLLAMA_URL`, `DB_ROOT`(Spider DB), `KOREAN_DB_ROOT`.
+
+### 6. Docker Compose
+`models/`에 GGUF 파일과 `Modelfile`을 넣은 뒤 Docker Desktop을 켜고 실행합니다.
+```bash
+docker compose up --build
+```
+처음 한 번은 베이스라인 모델 다운로드(약 2GB)와 파인튜닝 모델 등록으로 몇 분 걸립니다. `data/spider/`가 있으면 Spider DB도 함께 보입니다.
+
+## 데모 화면
+
+질문 하나가 **영수증 한 장**으로 인쇄됩니다. SQL은 주문 내역, 결과 행은 품목, 걸린 시간은 합계입니다.
+
+- **계산대**: DB와 모델(베이스라인 / 파인튜닝 / 둘 다 비교)을 고르고 질문을 인쇄합니다. 비교 모드에서는 두 영수증이 나란히 나오고, 결과 행이 같은지 표시합니다.
+- **자동수정**: 켜면 실행 오류가 난 SQL이 빨간 `VOID` 줄로 지워지고 고친 SQL이 이어서 인쇄됩니다. 같은 SQL을 반복하면 그렇다고 적습니다.
+- **한국어 평가 100문제 카탈로그**: 칸마다 두 모델의 실측 채점 결과가 표시되고, 누르면 그 질문이 입력됩니다.
+- **정산 리포트**: Spider·한국어·자동수정·학습 Loss 결과를 POS 일일 정산표(Z리포트) 형식으로 정리합니다. 숫자는 `scripts/export_demo_data.py`와 README의 실측값에서 가져옵니다.
+
+디자인 원칙은 `PRODUCT.md`와 `DESIGN.md`에 있습니다.
 
 ## 설계 메모
 
@@ -237,4 +265,5 @@ uvicorn app.main:app --reload
 - [x] 실행 오류 시 에러 메시지를 모델에 다시 주는 self-correction 루프
 - [x] self-correction 개선 실험: 컬럼 목록 힌트, 재시도 temperature (효과 없음, 기본 방식 유지)
 - [ ] 오류 수정 대화를 포함한 추가 학습
-- [ ] 웹 UI, Docker Compose
+- [x] 데모 화면(영수증 프린터), Docker Compose
+- [ ] README에 데모 GIF 추가, GitHub 공개

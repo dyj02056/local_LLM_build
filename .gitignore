@@ -10,5 +10,8 @@ data/sft/
 data/korean/database/
 data/korean/dev_ko.jsonl
 outputs/
+web/node_modules/
+web/dist/
+.impeccable/review/
 *.gguf
 *.safetensors

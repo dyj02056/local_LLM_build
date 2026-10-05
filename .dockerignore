@@ -1,0 +1,15 @@
+.venv/
+.git/
+.impeccable/
+.claude/
+**/__pycache__/
+**/node_modules/
+web/dist/
+data/spider/
+data/sft/
+data/korean/database/
+data/korean/dev_ko.jsonl
+outputs/
+models/
+loss_table/
+docs/

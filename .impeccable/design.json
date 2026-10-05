@@ -1,0 +1,433 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-05T01:35:10+00:00",
+  "title": "Design System: 질의 영수증 (Query Receipt)",
+  "extensions": {
+    "colorMeta": {
+      "counter": {
+        "role": "neutral",
+        "displayName": "Counter Charcoal",
+        "canonical": "#24272b",
+        "oklch": "oklch(27.1% 0.009 256)",
+        "tonalRamp": [
+          "oklch(15% 0.009 256)",
+          "oklch(25% 0.009 256)",
+          "oklch(35% 0.009 256)",
+          "oklch(45% 0.009 256)",
+          "oklch(55% 0.009 256)",
+          "oklch(65% 0.009 256)",
+          "oklch(80% 0.009 256)",
+          "oklch(95% 0.009 256)"
+        ]
+      },
+      "counter-2": {
+        "role": "neutral",
+        "displayName": "Raised Counter",
+        "canonical": "#2d3136",
+        "oklch": "oklch(31.1% 0.011 254)",
+        "tonalRamp": [
+          "oklch(15% 0.011 254)",
+          "oklch(25% 0.011 254)",
+          "oklch(35% 0.011 254)",
+          "oklch(45% 0.011 254)",
+          "oklch(55% 0.011 254)",
+          "oklch(65% 0.011 254)",
+          "oklch(80% 0.011 254)",
+          "oklch(95% 0.011 254)"
+        ]
+      },
+      "counter-3": {
+        "role": "neutral",
+        "displayName": "Pressed Counter",
+        "canonical": "#363b41",
+        "oklch": "oklch(35.0% 0.012 253)",
+        "tonalRamp": [
+          "oklch(15% 0.012 253)",
+          "oklch(25% 0.012 253)",
+          "oklch(35% 0.012 253)",
+          "oklch(45% 0.012 253)",
+          "oklch(55% 0.012 253)",
+          "oklch(65% 0.012 253)",
+          "oklch(80% 0.012 253)",
+          "oklch(95% 0.012 253)"
+        ]
+      },
+      "counter-line": {
+        "role": "neutral",
+        "displayName": "Counter Seam",
+        "canonical": "#454b52",
+        "oklch": "oklch(41.0% 0.014 252)",
+        "tonalRamp": [
+          "oklch(15% 0.014 252)",
+          "oklch(25% 0.014 252)",
+          "oklch(35% 0.014 252)",
+          "oklch(45% 0.014 252)",
+          "oklch(55% 0.014 252)",
+          "oklch(65% 0.014 252)",
+          "oklch(80% 0.014 252)",
+          "oklch(95% 0.014 252)"
+        ]
+      },
+      "counter-ink": {
+        "role": "neutral",
+        "displayName": "Counter Ink",
+        "canonical": "#eceae6",
+        "oklch": "oklch(93.7% 0.006 85)",
+        "tonalRamp": [
+          "oklch(15% 0.006 85)",
+          "oklch(25% 0.006 85)",
+          "oklch(35% 0.006 85)",
+          "oklch(45% 0.006 85)",
+          "oklch(55% 0.006 85)",
+          "oklch(65% 0.006 85)",
+          "oklch(80% 0.006 85)",
+          "oklch(95% 0.006 85)"
+        ]
+      },
+      "counter-mute": {
+        "role": "neutral",
+        "displayName": "Counter Mute",
+        "canonical": "#a9adb3",
+        "oklch": "oklch(74.6% 0.01 258)",
+        "tonalRamp": [
+          "oklch(15% 0.01 258)",
+          "oklch(25% 0.01 258)",
+          "oklch(35% 0.01 258)",
+          "oklch(45% 0.01 258)",
+          "oklch(55% 0.01 258)",
+          "oklch(65% 0.01 258)",
+          "oklch(80% 0.01 258)",
+          "oklch(95% 0.01 258)"
+        ]
+      },
+      "slot": {
+        "role": "neutral",
+        "displayName": "Printer Slot",
+        "canonical": "#15171a",
+        "oklch": "oklch(20.4% 0.007 258)",
+        "tonalRamp": [
+          "oklch(15% 0.007 258)",
+          "oklch(25% 0.007 258)",
+          "oklch(35% 0.007 258)",
+          "oklch(45% 0.007 258)",
+          "oklch(55% 0.007 258)",
+          "oklch(65% 0.007 258)",
+          "oklch(80% 0.007 258)",
+          "oklch(95% 0.007 258)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Thermal Paper",
+        "canonical": "#f3f3f0",
+        "oklch": "oklch(96.3% 0.004 106)",
+        "tonalRamp": [
+          "oklch(15% 0.004 106)",
+          "oklch(25% 0.004 106)",
+          "oklch(35% 0.004 106)",
+          "oklch(45% 0.004 106)",
+          "oklch(55% 0.004 106)",
+          "oklch(65% 0.004 106)",
+          "oklch(80% 0.004 106)",
+          "oklch(95% 0.004 106)"
+        ]
+      },
+      "paper-shade": {
+        "role": "neutral",
+        "displayName": "Paper Shade",
+        "canonical": "#e3e3de",
+        "oklch": "oklch(91.4% 0.007 107)",
+        "tonalRamp": [
+          "oklch(15% 0.007 107)",
+          "oklch(25% 0.007 107)",
+          "oklch(35% 0.007 107)",
+          "oklch(45% 0.007 107)",
+          "oklch(55% 0.007 107)",
+          "oklch(65% 0.007 107)",
+          "oklch(80% 0.007 107)",
+          "oklch(95% 0.007 107)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Print Ink",
+        "canonical": "#26272a",
+        "oklch": "oklch(27.3% 0.006 271)",
+        "tonalRamp": [
+          "oklch(15% 0.006 271)",
+          "oklch(25% 0.006 271)",
+          "oklch(35% 0.006 271)",
+          "oklch(45% 0.006 271)",
+          "oklch(55% 0.006 271)",
+          "oklch(65% 0.006 271)",
+          "oklch(80% 0.006 271)",
+          "oklch(95% 0.006 271)"
+        ]
+      },
+      "ink-mute": {
+        "role": "neutral",
+        "displayName": "Faded Ink",
+        "canonical": "#64656a",
+        "oklch": "oklch(50.8% 0.008 277)",
+        "tonalRamp": [
+          "oklch(15% 0.008 277)",
+          "oklch(25% 0.008 277)",
+          "oklch(35% 0.008 277)",
+          "oklch(45% 0.008 277)",
+          "oklch(55% 0.008 277)",
+          "oklch(65% 0.008 277)",
+          "oklch(80% 0.008 277)",
+          "oklch(95% 0.008 277)"
+        ]
+      },
+      "thermal": {
+        "role": "primary",
+        "displayName": "Thermal Red",
+        "canonical": "#c23a2b",
+        "oklch": "oklch(54.8% 0.175 30)",
+        "tonalRamp": [
+          "oklch(15% 0.048 30)",
+          "oklch(25% 0.08 30)",
+          "oklch(35% 0.111 30)",
+          "oklch(45% 0.143 30)",
+          "oklch(55% 0.175 30)",
+          "oklch(65% 0.143 30)",
+          "oklch(80% 0.095 30)",
+          "oklch(95% 0.048 30)"
+        ]
+      },
+      "thermal-soft": {
+        "role": "primary",
+        "displayName": "Soft Thermal",
+        "canonical": "#f0a093",
+        "oklch": "oklch(78.1% 0.098 30)",
+        "tonalRamp": [
+          "oklch(15% 0.027 30)",
+          "oklch(25% 0.045 30)",
+          "oklch(35% 0.062 30)",
+          "oklch(45% 0.08 30)",
+          "oklch(55% 0.098 30)",
+          "oklch(65% 0.08 30)",
+          "oklch(80% 0.053 30)",
+          "oklch(95% 0.027 30)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Double-height Print",
+        "purpose": "Receipt and Z-tape titles and totals; rendered at receipt size with transform scaleY(2)."
+      },
+      "headline": {
+        "displayName": "Wordmark",
+        "purpose": "Status-band wordmark and the print button label."
+      },
+      "title": {
+        "displayName": "Counter Label",
+        "purpose": "Control labels, legends and section headings on the counter."
+      },
+      "body": {
+        "displayName": "Counter Body",
+        "purpose": "Counter copy and helper text (14-16px)."
+      },
+      "receipt": {
+        "displayName": "Receipt Print",
+        "purpose": "Everything printed on paper: receipts, Z-tape, report tables."
+      },
+      "label": {
+        "displayName": "Inverse Label",
+        "purpose": "Inverse-print section labels on paper (ink fill, paper text)."
+      },
+      "caption": {
+        "displayName": "Cell Caption",
+        "purpose": "Catalog cell numbers, model hints, score line, compare tag (11-13px)."
+      }
+    },
+    "shadows": [
+      {
+        "name": "paper-lift",
+        "value": "drop-shadow(0 10px 18px rgb(10 12 14 / 0.35))",
+        "purpose": "CSS filter on every receipt and report tape; follows the zigzag mask."
+      },
+      {
+        "name": "slot-recess",
+        "value": "inset 0 2px 3px rgb(0 0 0 / 0.6)",
+        "purpose": "box-shadow on the printer slot rail above the output tray."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Default easing: print reveal, print button press, switch knob."
+      },
+      {
+        "name": "print-reveal",
+        "value": "clip-path inset(0 0 100% 0) to inset(0 0 0% 0), opacity 0.4 to 1, 420ms ease-out-expo, 110ms stagger per section",
+        "purpose": "Receipt sections appear top-down as if printed."
+      },
+      {
+        "name": "tray-drop",
+        "value": "translateY(-32px) to 0, opacity 0 to 1, spring stiffness 140 damping 22",
+        "purpose": "A new receipt drops out of the slot into the tray."
+      },
+      {
+        "name": "stage-pulse",
+        "value": "opacity 1, 0.25, 1 over 1.1s ease-in-out, infinite",
+        "purpose": "Status-band pip while a model is generating."
+      },
+      {
+        "name": "control-state",
+        "value": "150-300ms colour/transform transitions",
+        "purpose": "Hover and selection on counter controls."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation and transition durations 0.01ms under prefers-reduced-motion",
+        "purpose": "Motion is removed entirely, not softened."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "container-max",
+        "value": "1440px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Print Button",
+      "kind": "button",
+      "refersTo": "button-print",
+      "description": "The single primary action: a strip of lit paper that prints the receipt.",
+      "html": "<button class=\"ds-btn-print\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M214.67 72H200V40a8 8 0 0 0-8-8H64a8 8 0 0 0-8 8v32H41.33C27.36 72 16 82.77 16 96v80a8 8 0 0 0 8 8h32v32a8 8 0 0 0 8 8h128a8 8 0 0 0 8-8v-32h32a8 8 0 0 0 8-8V96c0-13.23-11.36-24-25.33-24ZM72 48h112v24H72Zm112 160H72v-48h112Zm40-40h-24v-16a8 8 0 0 0-8-8H64a8 8 0 0 0-8 8v16H32V96c0-4.41 4.19-8 9.33-8h173.34c5.14 0 9.33 3.59 9.33 8Z\"/></svg>인쇄</button>",
+      "css": ".ds-btn-print{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:52px;border:0;border-radius:6px;background:var(--color-paper,#f3f3f0);color:var(--color-ink,#26272a);font:700 17px 'Pretendard Variable',Pretendard,system-ui,sans-serif;cursor:pointer;transition:transform .2s cubic-bezier(0.16,1,0.3,1),background-color .2s cubic-bezier(0.16,1,0.3,1)}.ds-btn-print:hover{background:#fff}.ds-btn-print:active{transform:translateY(1px) scale(.99)}.ds-btn-print:focus-visible{outline:2px solid var(--color-counter-ink,#eceae6);outline-offset:2px}.ds-btn-print:disabled{background:var(--color-counter-3,#363b41);color:var(--color-counter-mute,#a9adb3);cursor:not-allowed}"
+    },
+    {
+      "name": "Question Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Textarea on the counter for the natural-language question.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">질문</span><textarea class=\"ds-input\" rows=\"3\" placeholder=\"예: 취소된 주문을 빼고 카테고리별 매출을 높은 순으로 보여 줘\"></textarea></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:8px;background:var(--color-counter,#24272b);padding:16px}.ds-field-label{font:600 14px 'Pretendard Variable',Pretendard,system-ui,sans-serif;color:var(--color-counter-ink,#eceae6)}.ds-input{background:var(--color-counter-2,#2d3136);color:var(--color-counter-ink,#eceae6);border:1px solid var(--color-counter-line,#454b52);border-radius:6px;padding:12px 14px;font:400 16px/1.625 'Pretendard Variable',Pretendard,system-ui,sans-serif;caret-color:var(--color-thermal,#c23a2b);resize:vertical}.ds-input::placeholder{color:rgb(169 173 179/.8)}.ds-input:hover{border-color:var(--color-counter-mute,#a9adb3)}.ds-input:focus{outline:none;border-color:var(--color-counter-ink,#eceae6)}"
+    },
+    {
+      "name": "Status Band",
+      "kind": "nav",
+      "refersTo": "nav-tab-active",
+      "description": "Sticky top band: logo, view tabs, live stage with elapsed seconds, connection state.",
+      "html": "<header class=\"ds-band\"><span class=\"ds-band-mark\">질의 영수증</span><nav class=\"ds-band-tabs\"><button class=\"ds-tab is-active\">계산대</button><button class=\"ds-tab\">정산 리포트</button></nav><span class=\"ds-band-status\"><span class=\"ds-pip\"></span>3번 · 파인튜닝 SQL 생성 중 <span class=\"ds-mono\">4.2초</span></span></header>",
+      "css": ".ds-band{display:flex;align-items:center;gap:32px;height:56px;padding:0 32px;background:rgb(36 39 43/.95);border-bottom:1px solid var(--color-counter-line,#454b52);color:var(--color-counter-ink,#eceae6);font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif}.ds-band-mark{font-weight:700;font-size:17px;letter-spacing:-.025em}.ds-band-tabs{display:flex;gap:4px}.ds-tab{border:0;background:none;border-radius:4px;padding:6px 12px;font:inherit;font-size:15px;color:var(--color-counter-mute,#a9adb3);cursor:pointer;transition:color .15s}.ds-tab:hover{color:var(--color-counter-ink,#eceae6)}.ds-tab.is-active{background:var(--color-counter-3,#363b41);color:var(--color-counter-ink,#eceae6);font-weight:600}.ds-tab:focus-visible{outline:2px solid var(--color-counter-ink,#eceae6);outline-offset:2px}.ds-band-status{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--color-counter-mute,#a9adb3)}.ds-pip{width:8px;height:8px;border-radius:1px;background:var(--color-thermal-soft,#f0a093);animation:ds-pulse 1.1s ease-in-out infinite}.ds-mono{font-family:'Nanum Gothic Coding',ui-monospace,monospace;color:var(--color-counter-ink,#eceae6)}@keyframes ds-pulse{50%{opacity:.25}}"
+    },
+    {
+      "name": "Model Segmented Control",
+      "kind": "chip",
+      "refersTo": "segment-active",
+      "description": "Three-way model choice; the active segment turns to lit paper.",
+      "html": "<div class=\"ds-seg\"><label class=\"ds-seg-item\"><span class=\"ds-seg-l\">베이스라인</span><span class=\"ds-seg-h\">qwen2.5-coder:3b</span></label><label class=\"ds-seg-item is-active\"><span class=\"ds-seg-l\">파인튜닝</span><span class=\"ds-seg-h\">text2sql-ft</span></label><label class=\"ds-seg-item\"><span class=\"ds-seg-l\">둘 다 비교</span><span class=\"ds-seg-h\">약 2배 시간</span></label></div>",
+      "css": ".ds-seg{display:grid;grid-template-columns:repeat(3,1fr);padding:4px;background:var(--color-counter-2,#2d3136);border:1px solid var(--color-counter-line,#454b52);border-radius:6px;font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif}.ds-seg-item{display:flex;flex-direction:column;align-items:center;padding:8px 4px;border-radius:5px;color:var(--color-counter-mute,#a9adb3);cursor:pointer;transition:background-color .2s,color .2s}.ds-seg-item:hover{background:var(--color-counter-3,#363b41);color:var(--color-counter-ink,#eceae6)}.ds-seg-item.is-active{background:var(--color-paper,#f3f3f0);color:var(--color-ink,#26272a)}.ds-seg-l{font-size:15px;font-weight:600}.ds-seg-h{margin-top:2px;font:11px 'Nanum Gothic Coding',ui-monospace,monospace}.ds-seg-item.is-active .ds-seg-h{color:var(--color-ink-mute,#64656a)}"
+    },
+    {
+      "name": "Self-correction Switch",
+      "kind": "custom",
+      "refersTo": "switch-on",
+      "description": "Pill switch; the on state is lit paper with an ink knob.",
+      "html": "<button class=\"ds-switch\" role=\"switch\" aria-checked=\"true\"><span class=\"ds-knob\"></span></button>",
+      "css": ".ds-switch{position:relative;width:48px;height:28px;border-radius:9999px;border:1px solid var(--color-counter-line,#454b52);background:var(--color-counter-2,#2d3136);cursor:pointer;transition:background-color .2s,border-color .2s}.ds-switch:hover{border-color:var(--color-counter-mute,#a9adb3)}.ds-switch[aria-checked=true]{background:var(--color-paper,#f3f3f0);border-color:var(--color-paper,#f3f3f0)}.ds-knob{position:absolute;top:50%;left:4px;width:20px;height:20px;border-radius:9999px;background:var(--color-counter-mute,#a9adb3);transform:translateY(-50%);transition:transform .3s cubic-bezier(0.16,1,0.3,1)}.ds-switch[aria-checked=true] .ds-knob{background:var(--color-ink,#26272a);transform:translate(20px,-50%)}.ds-switch:focus-visible{outline:2px solid var(--color-counter-ink,#eceae6);outline-offset:2px}"
+    },
+    {
+      "name": "Catalog Cell",
+      "kind": "custom",
+      "refersTo": "catalog-cell",
+      "description": "Numbered question cell with measured marks: solid = correct, dotted = wrong (baseline left, fine-tuned right).",
+      "html": "<div class=\"ds-cells\"><button class=\"ds-cell\"><span>7</span><span class=\"ds-marks\"><i class=\"ok\"></i><i class=\"ok\"></i></span></button><button class=\"ds-cell is-sel\"><span>8</span><span class=\"ds-marks\"><i class=\"ok\"></i><i></i></span></button><button class=\"ds-cell\"><span>9</span><span class=\"ds-marks\"><i></i><i class=\"ok\"></i></span></button></div>",
+      "css": ".ds-cells{display:grid;grid-template-columns:repeat(3,48px);gap:4px;background:var(--color-counter,#24272b);padding:12px}.ds-cell{display:flex;flex-direction:column;justify-content:space-between;aspect-ratio:1;border:0;border-radius:3px;padding:4px 4px 6px;background:var(--color-counter-2,#2d3136);color:var(--color-counter-mute,#a9adb3);font:12px/1 'Nanum Gothic Coding',ui-monospace,monospace;text-align:left;cursor:pointer;transition:background-color .15s,transform .15s}.ds-cell:hover{background:var(--color-counter-3,#363b41);color:var(--color-counter-ink,#eceae6)}.ds-cell:active{transform:scale(.95)}.ds-cell.is-sel{background:var(--color-paper,#f3f3f0);color:var(--color-ink,#26272a)}.ds-cell:focus-visible{outline:2px solid var(--color-counter-ink,#eceae6);outline-offset:2px}.ds-marks{display:flex;gap:3px;width:100%}.ds-marks i{flex:1;height:3px;background:radial-gradient(circle,currentColor 1px,transparent 1.3px) 0 0/4px 3px repeat-x;opacity:.7}.ds-marks i.ok{background:currentColor;opacity:1}"
+    },
+    {
+      "name": "Receipt",
+      "kind": "card",
+      "refersTo": "receipt",
+      "description": "The thermal receipt: 42ch paper with zigzag tear, inverse labels, VOID strike, dot leaders and a double-height total.",
+      "html": "<article class=\"ds-receipt\"><div class=\"ds-r-title\"><span class=\"ds-dh ds-wide\">질의영수증</span><div class=\"ds-mute\">LOCAL TEXT-TO-SQL · OLLAMA CPU</div></div><div class=\"ds-dash\"></div><div class=\"ds-lbl\">SQL</div><p class=\"ds-void\">SELECT name FROM product</p><p class=\"ds-thermal\"><span class=\"ds-void-tag\">VOID 1차</span> no such table: product</p><p>SELECT name FROM products</p><div class=\"ds-dash\"></div><div class=\"ds-leader\"><span>SQL 생성</span><span>5.8초</span></div><div class=\"ds-leader\"><span>DB 실행</span><span>0.0초</span></div><div class=\"ds-double\"></div><div class=\"ds-leader ds-b\"><span class=\"ds-dh\">합계</span><span class=\"ds-dh\">5.8초</span></div></article>",
+      "css": ".ds-receipt{--tooth:8px;width:calc(42ch + 3rem);padding:24px 24px 36px;background:var(--color-paper,#f3f3f0);color:var(--color-ink,#26272a);font:400 13.5px/1.55 'Nanum Gothic Coding',ui-monospace,monospace;font-feature-settings:'tnum' 1;-webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - var(--tooth)) no-repeat,conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/calc(var(--tooth)*2) var(--tooth) repeat-x;mask:linear-gradient(#000 0 0) top/100% calc(100% - var(--tooth)) no-repeat,conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/calc(var(--tooth)*2) var(--tooth) repeat-x;filter:drop-shadow(0 10px 18px rgb(10 12 14/.35))}.ds-receipt p{margin:0}.ds-r-title{text-align:center}.ds-dh{display:inline-block;transform:scaleY(2);margin-block:.55em;font-weight:700}.ds-wide{letter-spacing:.6em}.ds-mute{color:var(--color-ink-mute,#64656a)}.ds-dash{border-top:1.5px dashed currentColor;opacity:.55;margin:12px 0}.ds-double{border-top:3px double currentColor;margin:12px 0}.ds-lbl{display:inline-block;margin-bottom:6px;padding:0 6px;background:var(--color-ink,#26272a);color:var(--color-paper,#f3f3f0);font-size:.8em;font-weight:700;line-height:1.6;letter-spacing:.05em}.ds-void{color:var(--color-thermal,#c23a2b);text-decoration:line-through 1.5px}.ds-receipt .ds-thermal{color:var(--color-thermal,#c23a2b);margin-bottom:10px}.ds-void-tag{padding:0 4px;background:var(--color-thermal,#c23a2b);color:var(--color-paper,#f3f3f0)}.ds-leader{display:flex;align-items:baseline;gap:.5ch}.ds-leader::after{content:'';order:1;flex:1;border-bottom:1.5px dotted currentColor;opacity:.45;transform:translateY(-.25em)}.ds-leader>:last-child{order:2}.ds-b{font-weight:700}"
+    },
+    {
+      "name": "Pending Print",
+      "kind": "custom",
+      "refersTo": "receipt",
+      "description": "Dotted pending lines shown on a receipt while the model is generating.",
+      "html": "<div class=\"ds-pending\"><div class=\"ds-pend-head\"><span>모델이 SQL을 쓰는 중</span><span>4.2초</span></div><div class=\"ds-pl\" style=\"width:100%\"></div><div class=\"ds-pl\" style=\"width:80%\"></div><div class=\"ds-pl\" style=\"width:60%\"></div></div>",
+      "css": ".ds-pending{display:flex;flex-direction:column;gap:10px;width:calc(42ch + 3rem);padding:24px;background:var(--color-paper,#f3f3f0);color:var(--color-ink,#26272a);font:13.5px/1.55 'Nanum Gothic Coding',ui-monospace,monospace}.ds-pend-head{display:flex;justify-content:space-between;color:var(--color-ink-mute,#64656a)}.ds-pend-head span:last-child{color:var(--color-ink,#26272a)}.ds-pl{height:.7em;background:radial-gradient(circle,var(--color-ink,#26272a) 1.1px,transparent 1.4px) left center/6px 6px repeat-x;opacity:.35}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Thermal Receipt Counter",
+    "overview": "Every question prints a receipt. The screen is a charcoal point-of-sale counter; the work comes out of a printer slot as narrow off-white thermal strips. Generated SQL is the order line, result rows are the items, and generation and execution times add up to a total. The evaluation view is the same printer's end-of-day Z-report. The world refuses both the AI chat window and the card dashboard: nothing on screen is a chat bubble, and nothing is a floating shadowed card in a grid.\n\nTwo materials, two typefaces, and almost no colour. The counter (UI chrome, controls, the question catalog) is set in Pretendard in cool charcoal tones. The paper (receipts, the Z-tape, the report detail tape) is set in Nanum Gothic Coding, measured in character cells (42 columns for a receipt), and decorated only with what a thermal head can print: dashes, double rules, dot leaders, double-height type, inverse print, underline, and a second thermal colour, red, reserved for VOID, errors and the fine-tuned regression. Density is that of a working tool: compact, legible, numbers in tabular figures.\n\nWaiting is part of the product (a CPU LLM takes seconds), so state is shown by print form: dotted pending lines while the model writes, sections that reveal top-down as if printed, a struck-through VOID line when self-correction replaces SQL, and a sticky status band with the current stage and an elapsed-seconds clock.",
+    "keyCharacteristics": [
+      "Charcoal counter (dark, cool, low-chroma) under warm off-white thermal paper; dark color-scheme only.",
+      "Receipt type is monospace, counted in character cells, with a 42ch receipt measure.",
+      "Emphasis only by double height, inverse print, underline and bold; never by tint or size ramps on paper.",
+      "One accent: thermal red, used only for VOID, errors, and negative results.",
+      "Paper has a torn zigzag bottom edge and lifts off the counter with a soft drop shadow; everything else is flat.",
+      "State is expressed as print form (dotted pending, strike-through VOID, solid vs dotted marks), not as colour."
+    ],
+    "rules": [
+      {
+        "name": "The Second Colour Rule",
+        "body": "Thermal red appears only where a two-colour printer would use it: VOID, failure, and a measured regression. It never decorates, never marks a win, and never fills a button.",
+        "section": "colors"
+      },
+      {
+        "name": "The Lit Paper Rule",
+        "body": "On the counter, \"selected\" or \"ready\" is shown by switching a control to paper with ink type (the active segment, the selected cell, the switch, the print button), not by adding a hue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Printer Emphasis Rule",
+        "body": "On paper, emphasis is double height, inverse print, underline (1.5px, 4px offset) or bold. No larger font sizes, no colour tints except the Second Colour.",
+        "section": "typography"
+      },
+      {
+        "name": "The Character Cell Rule",
+        "body": "Paper is measured in ch: receipts are 42ch plus 3rem padding, the detail tape 88ch plus 4rem, gaps between table columns 2ch.",
+        "section": "typography"
+      },
+      {
+        "name": "The Only Paper Floats Rule",
+        "body": "If it is not thermal paper, it sits flat on the counter.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do put every result, measurement and generated artifact on thermal paper (paper on counter), set in Nanum Gothic Coding at 13.5px.",
+      "Do measure paper in character cells: 42ch receipts, 2ch column gaps, 8ch meta keys, 2ch hanging indent for wrapped SQL.",
+      "Do emphasise on paper only with double height (scaleY 2), inverse print (ink fill, paper text), 1.5px underline at 4px offset, or bold.",
+      "Do reserve thermal red for VOID, errors and measured regressions; use soft thermal for the same meanings on the counter.",
+      "Do show state by print form: dotted pending lines while waiting, strike-through for superseded SQL, solid vs dotted marks for right vs wrong.",
+      "Do mark \"selected\" on the counter by switching the control to lit paper with ink type.",
+      "Do separate paper sections with 1.5px dashed rules and totals with 3px double rules; connect items to values with dotted leaders.",
+      "Do keep tabular figures on everywhere and keep an elapsed clock visible whenever a model is generating."
+    ],
+    "donts": [
+      "Don't render a chat window: no message bubbles, avatars or typing indicators.",
+      "Don't build a card dashboard: no shadowed, rounded cards in a grid; only paper floats.",
+      "Don't round paper corners or give paper a border; its edges are straight sides and a zigzag tear.",
+      "Don't use thermal red for wins, primary actions or decoration.",
+      "Don't introduce a second hue or gradients; the palette is two neutral families plus thermal red.",
+      "Don't emphasise on paper with larger font sizes or coloured highlights.",
+      "Don't put shadows on counter controls; depth on the counter is tonal (counter, counter-2, counter-3)."
+    ]
+  }
+}
