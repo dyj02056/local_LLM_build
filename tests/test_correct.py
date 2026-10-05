@@ -24,6 +24,30 @@ def test_valid_sql_is_not_sent_to_model(sample_db):
     assert sql == "SELECT name FROM customer" and history == []
 
 
+def test_hint_lists_real_columns(sample_db):
+    seen = []
+
+    def fake_chat(messages, **_):
+        seen.append(messages)
+        return "SELECT name FROM customer"
+
+    self_correct([], "SELECT nam FROM customer", sample_db, fake_chat, use_hint=True)
+    prompt = seen[0][-1]["content"]
+    assert "- customer: id, name, city" in prompt and "orders" in prompt
+
+
+def test_resamples_when_model_repeats_itself(sample_db):
+    temps = []
+
+    def fake_chat(messages, temperature=0.0):
+        temps.append(temperature)
+        return "SELECT nam FROM customer" if temperature == 0 else "SELECT name FROM customer"
+
+    sql, history = self_correct([], "SELECT nam FROM customer", sample_db, fake_chat, repeat_temperature=0.7)
+    assert temps == [0.0, 0.7]
+    assert sql == "SELECT name FROM customer" and history[0]["resampled"]
+
+
 def test_stops_after_max_rounds(sample_db):
     calls = []
 

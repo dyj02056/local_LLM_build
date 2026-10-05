@@ -23,6 +23,9 @@ def main():
     ap.add_argument("--src", required=True, help="고칠 대상 predict 결과 태그 (예: ft-3b)")
     ap.add_argument("--tag", required=True, help="결과 태그 (예: ft-3b-sc)")
     ap.add_argument("--rounds", type=int, default=2, help="문제당 최대 재시도 횟수")
+    ap.add_argument("--hint", action="store_true", help="오류 메시지와 함께 테이블별 실제 컬럼 목록을 준다")
+    ap.add_argument("--repeat-temp", type=float, default=None,
+                    help="이미 시도한 SQL이 또 나오면 이 temperature로 다시 샘플링 (예: 0.7)")
     ap.add_argument("--data", default="data/sft/dev.jsonl")
     ap.add_argument("--db-root", default="data/spider/database")
     args = ap.parse_args()
@@ -43,7 +46,8 @@ def main():
                 raise SystemExit(f"{i}번째 문제가 dev 데이터와 다릅니다.")
             t0 = time.perf_counter()
             sql, history = self_correct(
-                ex["messages"][:-1], p["pred"], db_path_for(args.db_root, p["db_id"]), chat_fn, args.rounds
+                ex["messages"][:-1], p["pred"], db_path_for(args.db_root, p["db_id"]), chat_fn, args.rounds,
+                use_hint=args.hint, repeat_temperature=args.repeat_temp,
             )
             extra = time.perf_counter() - t0
             row = {**p, "pred": sql, "latency_s": round(p["latency_s"] + extra, 3),

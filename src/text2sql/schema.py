@@ -29,3 +29,15 @@ def get_schema(db_path: str | Path, sample_rows: int = 0) -> str:
         return "\n\n".join(parts)
     finally:
         conn.close()
+
+
+def get_columns(db_path: str | Path) -> dict[str, list[str]]:
+    """테이블별 실제 컬럼 이름. (authorizer가 PRAGMA를 막으므로 빈 SELECT의 description으로 읽는다)"""
+    conn = connect_readonly(db_path)
+    try:
+        tables = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+        ).fetchall()
+        return {t: [d[0] for d in conn.execute(f'SELECT * FROM "{t}" LIMIT 0').description] for (t,) in tables}
+    finally:
+        conn.close()
