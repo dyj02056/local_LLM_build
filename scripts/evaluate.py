@@ -17,6 +17,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("preds")
     ap.add_argument("--db-root", default="data/spider/database")
+    ap.add_argument("--tie-aware", action="store_true",
+                    help="정답 정렬에 동점이 있으면 동점끼리의 순서 차이는 정답으로 인정 (외부 질문셋용)")
     args = ap.parse_args()
 
     with open(args.preds, encoding="utf-8") as f:
@@ -26,7 +28,7 @@ def main():
 
     results = []
     for p in preds:
-        r = evaluate_example(db_path_for(args.db_root, p["db_id"]), p["pred"], p["gold"])
+        r = evaluate_example(db_path_for(args.db_root, p["db_id"]), p["pred"], p["gold"], tie_aware=args.tie_aware)
         results.append({**p, "correct": r.correct, "error": r.error})
 
     n = len(results)

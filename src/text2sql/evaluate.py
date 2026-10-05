@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .executor import execute
+from .ties import match_with_ties, tie_variants
 
 
 def results_match(pred_rows: list[tuple], gold_rows: list[tuple], ordered: bool) -> bool:
@@ -25,7 +26,10 @@ class ExampleResult:
     error: str | None = None
 
 
-def evaluate_example(db_path: str | Path, pred_sql: str, gold_sql: str, timeout_s: float = 10.0) -> ExampleResult:
+def evaluate_example(
+    db_path: str | Path, pred_sql: str, gold_sql: str, timeout_s: float = 10.0, tie_aware: bool = False
+) -> ExampleResult:
+    """tie_aware=True면 정답 정렬에 동점이 있을 때 동점끼리의 순서 차이는 정답으로 인정한다."""
     try:
         _, gold_rows = execute(db_path, gold_sql, timeout_s=timeout_s)
     except sqlite3.Error as e:
@@ -35,4 +39,8 @@ def evaluate_example(db_path: str | Path, pred_sql: str, gold_sql: str, timeout_
     except sqlite3.Error as e:
         return ExampleResult(False, str(e))
     ordered = "order by" in gold_sql.lower()
+    if ordered and tie_aware:
+        variants = tie_variants(db_path, gold_sql, timeout_s)
+        if variants and variants[0] != variants[1]:
+            return ExampleResult(match_with_ties(pred_rows, *variants))
     return ExampleResult(results_match(pred_rows, gold_rows, ordered))
