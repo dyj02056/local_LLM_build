@@ -4,6 +4,7 @@
 #   v1: data/sft/train.jsonl     (Spider만)
 #   v2: data/sft/train_v2.jsonl  (Spider + 한국어 다중 JOIN, scripts/make_train_v2.py)
 #   v3: data/sft/train_v3.jsonl  (Spider + JOIN 필요/불필요 균형, scripts/gen_korean_train_v3.py)
+#   v4: data/sft/train_v4.jsonl  (v3 + 오류 수정 대화, make_train_v2.py --extra data/korean_train/fix_dialogs.jsonl)
 # Colab 파일은 런타임이 끊기면 사라지므로 결과물은 단계마다 Google Drive로 복사한다.
 # Unsloth/TRL 버전에 따라 인자명이 바뀔 수 있으니 오류가 나면 Unsloth 공식 노트북을 참고하세요.
 
@@ -18,7 +19,12 @@ from google.colab import drive
 
 drive.mount("/content/drive")
 RUN = "v3"  # 결과가 이전 실행을 덮어쓰지 않도록 실행마다 다른 이름을 쓴다 (v1 결과는 text2sql/ 바로 아래에 있음)
-DATA_FILE = {"v1": "data/sft/train.jsonl", "v2": "data/sft/train_v2.jsonl", "v3": "data/sft/train_v3.jsonl"}[RUN]
+DATA_FILE = {
+    "v1": "data/sft/train.jsonl",
+    "v2": "data/sft/train_v2.jsonl",
+    "v3": "data/sft/train_v3.jsonl",
+    "v4": "data/sft/train_v4.jsonl",  # v3 + 오류 수정 대화 (scripts/gen_fix_dialogs.py)
+}[RUN]
 BACKUP_DIR = f"/content/drive/MyDrive/text2sql/{RUN}"
 
 # %% 3. 모델 로드 (4bit)
@@ -82,6 +88,24 @@ trainer = train_on_responses_only(
     instruction_part="<|im_start|>user\n",
     response_part="<|im_start|>assistant\n",
 )
+
+# 오류 수정 대화(scripts/gen_fix_dialogs.py)는 assistant 턴이 둘이다: 틀린 SQL, 고친 SQL.
+# train_on_responses_only는 두 턴 모두 Loss를 계산하므로, 틀린 SQL을 배우지 않게 마지막 응답만 남긴다.
+# assistant 턴이 하나인 일반 예시는 그대로다.
+RESP_IDS = tokenizer.encode("<|im_start|>assistant\n", add_special_tokens=False)
+
+
+def last_response_only(ex):
+    ids, labels = ex["input_ids"], list(ex["labels"])
+    n = len(RESP_IDS)
+    starts = [i for i in range(len(ids) - n + 1) if ids[i : i + n] == RESP_IDS]
+    if len(starts) > 1:
+        cut = starts[-1] + n
+        labels[:cut] = [-100] * cut
+    return {"labels": labels}
+
+
+trainer.train_dataset = trainer.train_dataset.map(last_response_only)
 trainer.train()
 
 # %% 6. LoRA 어댑터 + Loss 기록 저장, Drive 백업 (GGUF 변환이 실패해도 학습 결과는 보존)
