@@ -27,7 +27,24 @@
           결과 ◀── 읽기 전용 · 권한 제한 · 타임아웃이 걸린 SQLite 실행 ◀┘
 ```
 
-## 결과
+## 결과 한눈에
+
+세 가지 평가셋의 실행 정확도입니다. 아래 접힌 항목을 펼치면 세부 분석이 있습니다.
+
+| 평가 | 베이스라인 | v1 (Spider 학습) | v2 (+한국어 다중 JOIN) |
+|---|---|---|---|
+| Spider dev 1,034문제 (영어) | 61.8% | **73.4%** | 73.1% |
+| 직접 만든 한국어 쇼핑몰 100문제 | **71%** | 66% | 68% |
+| └ JOIN 2개 이상 (14문제) | **9** | 2 | 4 |
+| 외부 LLM 4곳이 만든 한국어 118문항 | **73.7%** | 61.0% | 61.9% |
+| └ JOIN 0개 (59) | **90%** | 86% | 81% |
+| └ JOIN 1개 (18) | **83%** | 78% | 61% |
+| └ JOIN 2개 이상 (41) | **46%** | 17% | 34% |
+
+- 파인튜닝은 영어 벤치마크(Spider)에서 +11.6%p를 올렸지만, 한국어 쇼핑몰 DB에서는 오히려 베이스라인보다 낮았습니다.
+- v1은 테이블을 **너무 적게** 잇고(중간 테이블을 건너뜀), v2는 **너무 많이** 잇습니다(필요 없는 JOIN을 붙임). 다음 단계(v3)는 둘의 균형입니다.
+
+## Spider 결과 (영어)
 
 Spider dev 세트 전체(1,034문제, DB 20개)의 실행 정확도(Execution Accuracy)입니다. 실험을 진행하면서 채웁니다.
 
@@ -40,7 +57,9 @@ Spider dev 세트 전체(1,034문제, DB 20개)의 실행 정확도(Execution Ac
 | Qwen2.5-Coder-3B | QLoRA 파인튜닝 + self-correction | **74.4%** | **3.6%** | 5.97s |
 | Qwen2.5-Coder-3B | QLoRA 파인튜닝 v2 (Spider + 한국어 다중 JOIN) | 73.1% | 6.5% | 5.34s |
 
-### 파인튜닝 전후 비교
+<details>
+<summary><b>파인튜닝 전후 비교</b> — EX +11.6%p, 176문제 새로 맞음 / 56문제 새로 틀림</summary>
+
 
 같은 1,034문제에서 **EX +11.6%p (61.8% → 73.4%)**, SQL 오류율은 절반 이하(13.4% → 6.1%)로 줄었습니다.
 문제별로 보면 176문제가 새로 맞고 56문제가 새로 틀려 순증 120문제입니다. 부호 검정 기준 z ≈ 7.9로, 우연으로 보기 어려운 차이입니다.
@@ -73,7 +92,11 @@ Spider dev 세트 전체(1,034문제, DB 20개)의 실행 정확도(Execution Ac
 
 상세 비교는 `python scripts/compare.py outputs/preds_base-3b_eval.jsonl outputs/preds_ft-3b_eval.jsonl`로 재현할 수 있습니다.
 
-### Self-correction 실험
+</details>
+
+<details>
+<summary><b>Self-correction 실험</b> — +1.0%p에 그친 이유는 "같은 SQL 반복" 40~65%</summary>
+
 
 실행 오류가 난 SQL만 SQLite 오류 메시지와 함께 모델에 다시 보여 주고 고치게 했습니다 (최대 2회). 정답 SQL은 쓰지 않으므로 실제 서비스에서도 같은 효과를 기대할 수 있습니다.
 
@@ -102,7 +125,11 @@ Spider dev 세트 전체(1,034문제, DB 20개)의 실행 정확도(Execution Ac
 - 세 방식이 고친 문제를 모두 합쳐도 11개로, 대부분 겹칩니다. 63문제 중 프롬프트만으로 고칠 수 있는 문제는 10개 안팎이 한계로 보입니다.
 - **결론**: 이 모델 크기에서는 지시를 더하는 것보다 단순한 기본 방식이 가장 낫습니다. 더 개선하려면 오류 수정 대화를 학습 데이터에 넣어 모델이 고치는 법 자체를 배우게 해야 합니다.
 
-### 베이스라인 오류 분석 (zero-shot)
+</details>
+
+<details>
+<summary><b>베이스라인 오류 분석 (zero-shot)</b> — 주원인은 스키마 연결 실패</summary>
+
 
 정답 SQL의 구성 요소별 정답률입니다. 한 문제가 여러 유형에 속할 수 있습니다.
 
@@ -120,7 +147,11 @@ Spider dev 세트 전체(1,034문제, DB 20개)의 실행 정확도(Execution Ac
 - DB별 편차가 큽니다: `car_1` 34%, `world_1` 37% ↔ `poker_player` 98%, `orchestra` 95%
 - Spider 정답 자체의 오류도 발견했습니다. 예: "dog는 있고 cat은 없는 학생의 first name" 질문에 정답 SQL이 `fname, age`를 출력합니다.
 
-### 학습 과정 (QLoRA)
+</details>
+
+<details>
+<summary><b>학습 과정 (QLoRA)</b> — Loss 0.404 → 0.080</summary>
+
 
 ![QLoRA fine-tuning loss](docs/loss_curve.png)
 
@@ -134,9 +165,14 @@ Spider dev 세트 전체(1,034문제, DB 20개)의 실행 정확도(Execution Ac
 - `train_on_responses_only`로 SQL 부분에만 Loss를 계산하므로, 위 값은 "정답 SQL을 얼마나 그대로 써내는가"를 뜻합니다.
 - 학습 Loss는 학습 데이터 기준이라 일반화 성능을 보장하지 않습니다. 실제 성능은 학습에 쓰지 않은 dev 세트의 실행 정확도로 판단합니다.
 
+</details>
+
 ## 한국어 평가 (직접 구축)
 
 Spider는 영어 질문뿐이라, 한국어 질문에서도 쓸 만한지 확인하려고 평가셋을 직접 만들었습니다.
+
+<details>
+<summary><b>한국어 100문제 세부 결과</b> — 파인튜닝 71% → 66%, JOIN 2개 이상에서 64% → 14%</summary>
 
 - **DB**: 가상 쇼핑몰 (`customers`, `categories`, `products`, `orders`, `order_items`, `reviews`). 고객 200명, 주문 800건, 리뷰 380건. 이름은 영어, 값은 한국어(`'서울'`, `'취소'`)인 국내 서비스에서 흔한 형태입니다. `scripts/build_shop_db.py`가 고정 seed로 생성합니다.
 - **질문 100개**: 쉬움 25, 보통 35, 어려움 40. "~야?", "~줘", "~인가요?"를 섞고, 매출/판매액, 고객/회원처럼 같은 뜻의 다른 표현을 넣었습니다.
@@ -163,7 +199,11 @@ Spider는 영어 질문뿐이라, 한국어 질문에서도 쓸 만한지 확인
 
 **시사점**: 공개 벤치마크 점수 향상이 실제 서비스 DB 성능을 보장하지 않습니다. 다음 단계로 여러 테이블을 잇는 한국어 학습 데이터를 만들어 추가 학습했습니다 (아래 v2).
 
-### v2: 약점을 겨냥한 한국어 다중 JOIN 학습
+</details>
+
+<details>
+<summary><b>v2: 약점을 겨냥한 한국어 다중 JOIN 학습</b> — JOIN 2개 이상 2/14 → 4/14, 베이스라인(9/14)에는 미달</summary>
+
 
 평가용 쇼핑몰 DB로 학습하면 시험 문제를 미리 보는 셈이므로, **쇼핑몰과 겹치지 않는 DB 4개**(도서관, 병원, 학원, 여행사)를 새로 만들었습니다. 전자상거래 형태(배달앱 등)는 구조가 비슷해서 일부러 뺐습니다.
 
@@ -188,7 +228,11 @@ Spider는 영어 질문뿐이라, 한국어 질문에서도 쓸 만한지 확인
 
 ![v1과 v2의 학습 Loss 비교](docs/loss_compare.png)
 
-### 외부 LLM이 쓴 질문으로 다시 평가 (118문항)
+</details>
+
+<details>
+<summary><b>외부 LLM이 쓴 질문으로 다시 평가 (118문항)</b> — v1 약점 재현, v2는 필요 없는 JOIN을 붙임</summary>
+
 
 같은 사람이 만든 질문으로만 평가하면 말투에서 오는 이점이 생길 수 있습니다. 그래서 **ChatGPT, Gemini, DeepSeek, Meta**에게 같은 프롬프트([data/korean/questions_generation_prompt.md](data/korean/questions_generation_prompt.md))로 쇼핑몰 DB 질문과 정답 SQL을 30개씩 받았습니다.
 
@@ -218,7 +262,13 @@ Spider는 영어 질문뿐이라, 한국어 질문에서도 쓸 만한지 확인
 
 재현: `python scripts/prepare_external.py` → 세 모델로 `predict.py --data data/korean/dev_ext.jsonl` → `evaluate.py --tie-aware` → `python scripts/report_external.py`
 
+</details>
+
 ## 구조
+
+<details>
+<summary><b>펼쳐 보기: 소스 폴더와 스크립트 목록</b></summary>
+
 
 ```
 src/text2sql/
@@ -237,6 +287,7 @@ scripts/
   plot_loss.py        Colab 학습 로그 → Loss 그래프 (pip install -e ".[plot]")
   build_shop_db.py    한국어 평가용 가상 쇼핑몰 DB 생성
   build_korean_train_dbs.py, gen_korean_train.py, make_train_v2.py   v2 학습 데이터 (쇼핑몰과 다른 DB 4개)
+  gen_korean_train_v3.py   v3 학습 데이터 (JOIN 0개 50% · 1개 15% · 2개 이상 35%, 대조 쌍 포함)
   cleanup.ps1         프로젝트 종료 후 용량 정리 (기본은 미리보기)
   prepare_korean.py   한국어 질문 검증 → 평가용 JSONL
   export_demo_data.py 화면에 보여 줄 실측 데이터 → web/src/data/
@@ -248,6 +299,8 @@ models/Modelfile            파인튜닝 GGUF를 Ollama에 등록하는 설정
 tests/                      실행기 보안·평가 로직·API 테스트
 Dockerfile, docker-compose.yml   Ollama + API + 화면을 한 번에 실행
 ```
+
+</details>
 
 ## 실행 방법
 
@@ -330,7 +383,7 @@ README의 데모 GIF와 스크린샷은 앱을 띄운 상태에서 `web/`의 `np
 - **계산대**: DB와 모델(베이스라인 / 파인튜닝 / 둘 다 비교)을 고르고 질문을 인쇄합니다. 비교 모드에서는 두 영수증이 나란히 나오고, 결과 행이 같은지 표시합니다.
 - **자동수정**: 켜면 실행 오류가 난 SQL이 빨간 `VOID` 줄로 지워지고 고친 SQL이 이어서 인쇄됩니다. 같은 SQL을 반복하면 그렇다고 적습니다.
 - **한국어 평가 100문제 카탈로그**: 칸마다 두 모델의 실측 채점 결과가 표시되고, 누르면 그 질문이 입력됩니다.
-- **정산 리포트**: Spider·한국어·자동수정·학습 Loss 결과를 POS 일일 정산표(Z리포트) 형식으로 정리합니다. 숫자는 `scripts/export_demo_data.py`와 README의 실측값에서 가져옵니다.
+- **정산 리포트**: Spider·한국어·외부 AI 질문·자동수정·학습 Loss 결과를 POS 일일 정산표(Z리포트) 형식으로 정리합니다. 숫자는 `scripts/export_demo_data.py`와 README의 실측값에서 가져옵니다.
 
 디자인 원칙은 `PRODUCT.md`와 `DESIGN.md`에 있습니다.
 

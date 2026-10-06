@@ -3,6 +3,7 @@
 # 준비물: 로컬에서 만든 학습 파일을 Colab의 /content/data/sft/ 에 업로드.
 #   v1: data/sft/train.jsonl     (Spider만)
 #   v2: data/sft/train_v2.jsonl  (Spider + 한국어 다중 JOIN, scripts/make_train_v2.py)
+#   v3: data/sft/train_v3.jsonl  (Spider + JOIN 필요/불필요 균형, scripts/gen_korean_train_v3.py)
 # Colab 파일은 런타임이 끊기면 사라지므로 결과물은 단계마다 Google Drive로 복사한다.
 # Unsloth/TRL 버전에 따라 인자명이 바뀔 수 있으니 오류가 나면 Unsloth 공식 노트북을 참고하세요.
 
@@ -16,8 +17,8 @@
 from google.colab import drive
 
 drive.mount("/content/drive")
-RUN = "v2"  # 결과가 이전 실행을 덮어쓰지 않도록 실행마다 다른 이름을 쓴다 (v1 결과는 text2sql/ 바로 아래에 있음)
-DATA_FILE = {"v1": "data/sft/train.jsonl", "v2": "data/sft/train_v2.jsonl"}[RUN]
+RUN = "v3"  # 결과가 이전 실행을 덮어쓰지 않도록 실행마다 다른 이름을 쓴다 (v1 결과는 text2sql/ 바로 아래에 있음)
+DATA_FILE = {"v1": "data/sft/train.jsonl", "v2": "data/sft/train_v2.jsonl", "v3": "data/sft/train_v3.jsonl"}[RUN]
 BACKUP_DIR = f"/content/drive/MyDrive/text2sql/{RUN}"
 
 # %% 3. 모델 로드 (4bit)
@@ -119,4 +120,4 @@ for p in keep:
     shutil.copy2(p, f"{BACKUP_DIR}/gguf_out/{os.path.basename(p)}")
     print("백업 완료:", p)
 # Drive의 text2sql/<RUN>/gguf_out 에서 .gguf 파일을 내려받아 models/<RUN>/ 에 두고 로컬에서:
-#   ollama create text2sql-ft-v2 -f models/v2/Modelfile
+#   ollama create text2sql-ft-<RUN> -f models/<RUN>/Modelfile   (예: text2sql-ft-v3)

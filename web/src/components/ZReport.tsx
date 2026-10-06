@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { korean, selfCorrection, spider, training, v2Data } from "../data/report";
+import { external, korean, selfCorrection, spider, training, v2Data } from "../data/report";
 import { LossChart } from "./LossChart";
 
 /** 정산 테이프의 한 구역. 구역 사이는 이중선으로 끊는다. */
@@ -60,10 +60,66 @@ function DumbbellLegend() {
 
 const th = "pb-2 pr-4 text-left font-bold whitespace-nowrap border-b-[1.5px] border-dashed border-ink/50 last:pr-0";
 const td = "py-1.5 pr-4 whitespace-nowrap last:pr-0";
+const tdTotal = `${td} border-t-[1.5px] border-dashed border-ink/50`;
+
+type ModelCounts = { k: string; n: number; base: number; ft: number; ft2: number };
+
+/** 베이스라인 · v1 · v2 정답률 표. 값은 맞힌 문항 수, 표시는 %. total이 있으면 합계 줄을 붙인다. */
+function ThreeModelTable({ head, rows, total }: { head: string; rows: ModelCounts[]; total?: ModelCounts }) {
+  const p = (v: number, n: number) => Math.round((v / n) * 100);
+  const totalPct = (v: number) => (total!.n === 100 ? `${v}%` : pct((v / total!.n) * 100));
+  return (
+    <div className="overflow-x-auto [&+&]:mt-6">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr>
+            <th className={th.replace("whitespace-nowrap", "break-keep")}>{head}</th>
+            <th className={`${th} text-right`}>문제</th>
+            <th className={`${th} text-right`}>베이스라인</th>
+            <th className={`${th} text-right`}>v1</th>
+            <th className={`${th} text-right`}>v2</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => {
+            const worse = (v: number) => p(v, r.n) < p(r.base, r.n) - 10;
+            return (
+              <tr key={r.k} className={worse(r.ft) || worse(r.ft2) ? "text-thermal" : ""}>
+                <td className={td}>{r.k}</td>
+                <td className={`${td} text-right text-ink-mute`}>{r.n}</td>
+                <td className={`${td} text-right`}>{p(r.base, r.n)}%</td>
+                <td className={`${td} text-right ${worse(r.ft) ? UNDERLINE : ""}`}>{p(r.ft, r.n)}%</td>
+                <td className={`${td} text-right ${worse(r.ft2) ? UNDERLINE : ""}`}>{p(r.ft2, r.n)}%</td>
+              </tr>
+            );
+          })}
+          {total && (
+            <tr className="font-bold">
+              <td className={tdTotal}>{total.k}</td>
+              <td className={`${tdTotal} text-right text-ink-mute`}>{total.n}</td>
+              <td className={`${tdTotal} text-right`}>{totalPct(total.base)}</td>
+              <td className={`${tdTotal} text-right`}>{totalPct(total.ft)}</td>
+              <td className={`${tdTotal} text-right`}>{totalPct(total.ft2)}</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 function ZTape() {
   const s0 = spider.rows[0];
   const s2 = spider.rows[2];
+  const ext = {
+    base: (external.overall.base / external.total) * 100,
+    ft: (external.overall.ft / external.total) * 100,
+    ft2: (external.overall.ft2 / external.total) * 100,
+  };
+  const [j0, j1, j2] = external.byJoins;
+  const extMulti = { base: `${j2.base}/${j2.n}`, ft: `${j2.ft}/${j2.n}`, ft2: `${j2.ft2}/${j2.n}` };
+  const few = j0.n + j1.n;
+  const extFew = { base: `${j0.base + j1.base}/${few}`, ft: `${j0.ft + j1.ft}/${few}`, ft2: `${j0.ft2 + j1.ft2}/${few}` };
   const line = (k: string, v: ReactNode) => (
     <div className="leader">
       <span>{k}</span>
@@ -100,6 +156,11 @@ function ZTape() {
       {line("한국어 정확도 (v1→v2)", `${korean.overall.ft}% → ${korean.overall.ft2}%`)}
       {line("JOIN 2개 이상", `${korean.byJoins[2].ft}/14 → ${korean.byJoins[2].ft2}/14`)}
       {line("Spider (v1→v2)", `${pct(s2.ex)} → ${pct(spider.rows[4].ex)}`)}
+      <div className="rule-dash my-3" />
+      <p className="text-ink-mute">외부 AI 질문 {external.total}문항 (베이스→v1→v2)</p>
+      {line("실행 정확도", [ext.base, ext.ft, ext.ft2].map((v) => `${Math.round(v)}%`).join(" → "))}
+      {line("JOIN 2개 이상", `${extMulti.base} → ${extMulti.ft} → ${extMulti.ft2}`)}
+      {line("JOIN 0~1개", `${extFew.base} → ${extFew.ft} → ${extFew.ft2}`)}
       <div className="rule-dash my-3" />
       {line("자동수정 (Spider)", delta(spider.rows[3].ex - s2.ex))}
       {line("학습 Loss", `${training.lossStart.toFixed(3)} → ${training.lossEnd.toFixed(3)}`)}
@@ -198,48 +259,12 @@ export function ZReport() {
           title="한국어 쇼핑몰 100문제"
           note="직접 만든 질문과 정답 SQL입니다. v1(Spider만 학습)은 여러 테이블을 이어야 하는 문제에서 무너졌고, 그 약점을 겨냥해 v2를 학습했습니다."
         >
-          {[
-            { head: "난이도", rows: korean.byLevel.map((r) => ({ k: r.level, ...r })) },
-            { head: "정답 SQL의 JOIN 수", rows: korean.byJoins.map((r) => ({ k: r.joins, ...r })) },
-          ].map((tbl) => (
-            <div key={tbl.head} className="overflow-x-auto [&+&]:mt-6">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr>
-                    <th className={th}>{tbl.head}</th>
-                    <th className={`${th} text-right`}>문제</th>
-                    <th className={`${th} text-right`}>베이스라인</th>
-                    <th className={`${th} text-right`}>v1</th>
-                    <th className={`${th} text-right`}>v2</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tbl.rows.map((r) => {
-                    const p = (v: number) => Math.round((v / r.n) * 100);
-                    const worse = (v: number) => p(v) < p(r.base) - 10;
-                    return (
-                      <tr key={r.k} className={worse(r.ft) || worse(r.ft2) ? "text-thermal" : ""}>
-                        <td className={td}>{r.k}</td>
-                        <td className={`${td} text-right text-ink-mute`}>{r.n}</td>
-                        <td className={`${td} text-right`}>{p(r.base)}%</td>
-                        <td className={`${td} text-right ${worse(r.ft) ? UNDERLINE : ""}`}>{p(r.ft)}%</td>
-                        <td className={`${td} text-right ${worse(r.ft2) ? UNDERLINE : ""}`}>{p(r.ft2)}%</td>
-                      </tr>
-                    );
-                  })}
-                  {tbl.head === "난이도" && (
-                    <tr className="font-bold">
-                      <td className={`${td} border-t-[1.5px] border-dashed border-ink/50`}>전체</td>
-                      <td className={`${td} border-t-[1.5px] border-dashed border-ink/50 text-right text-ink-mute`}>{korean.total}</td>
-                      <td className={`${td} border-t-[1.5px] border-dashed border-ink/50 text-right`}>{korean.overall.base}%</td>
-                      <td className={`${td} border-t-[1.5px] border-dashed border-ink/50 text-right`}>{korean.overall.ft}%</td>
-                      <td className={`${td} border-t-[1.5px] border-dashed border-ink/50 text-right`}>{korean.overall.ft2}%</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          ))}
+          <ThreeModelTable
+            head="난이도"
+            rows={korean.byLevel.map((r) => ({ k: r.level, ...r }))}
+            total={{ k: "전체", n: korean.total, ...korean.overall }}
+          />
+          <ThreeModelTable head="정답 SQL의 JOIN 수" rows={korean.byJoins.map((r) => ({ k: r.joins, ...r }))} />
           <p className="mt-3 text-[12px] text-ink-mute">빨간 밑줄: 베이스라인보다 10%p 넘게 낮음</p>
           <p className="mt-4 text-ink-mute">
             v1은 주문 → 주문상품 → 상품 → 카테고리처럼 긴 경로에서 중간 테이블을 건너뛰었습니다. Spider에서 불필요한 JOIN을
@@ -250,6 +275,32 @@ export function ZReport() {
             이상 {v2Data.multiJoin}개)를 Spider와 섞어 다시 학습했습니다. JOIN 2개 이상 문제는 2개에서 4개로 늘었지만
             베이스라인(9개)에는 크게 못 미쳤고, 어려움 난이도는 그대로입니다. v1 대비 새로 맞음 {korean.flipsV2.fixed}, 새로
             틀림 {korean.flipsV2.broken}으로 우연과 구분되지 않는 차이입니다.
+          </p>
+        </Segment>
+
+        <Segment
+          title="외부 AI 질문 118문항"
+          note="같은 사람이 만든 질문만으로 평가하면 말투 덕을 볼 수 있어서, ChatGPT · Gemini · DeepSeek · Meta가 같은 쇼핑몰 DB로 쓴 질문과 정답 SQL로 다시 채점했습니다. 정렬 동점이 있는 문항은 동점끼리 순서를 바꿔도 정답으로 봅니다."
+        >
+          <ThreeModelTable
+            head="정답 SQL의 JOIN 수"
+            rows={external.byJoins.map((r) => ({ k: r.joins, ...r }))}
+            total={{ k: "전체", n: external.total, ...external.overall }}
+          />
+          <ThreeModelTable head="질문을 쓴 AI" rows={external.bySource.map((r) => ({ k: r.source, ...r }))} />
+          <p className="mt-3 text-[12px] text-ink-mute">빨간 밑줄: 베이스라인보다 10%p 넘게 낮음</p>
+          <p className="mt-4 text-ink-mute">
+            말투 이점은 없었습니다. 베이스라인 대비 v1의 하락은 직접 만든 질문(-5%p)보다 외부 질문(-12.7%p)에서 더
+            컸습니다 (새로 맞음 {external.flips.fixed}, 새로 틀림 {external.flips.broken}, z ≈ {external.flips.z.toFixed(1)}).
+          </p>
+          <p className="mt-3">
+            <span className={UNDERLINE}>v1은 테이블을 너무 적게 잇고, v2는 너무 많이 잇습니다.</span>{" "}
+            <span className="text-ink-mute">
+              v1과 비교하면 v2는 JOIN 2개 이상 문항에서 좋아졌지만(새로 맞음 {external.flipsV2Multi.fixed}, 새로 틀림{" "}
+              {external.flipsV2Multi.broken}), JOIN 0~1개 문항에서는 나빠졌습니다(새로 맞음 {external.flipsV2Few.fixed}, 새로
+              틀림 {external.flipsV2Few.broken}). 예를 들어 "브랜드별 상품 수"는 products만 쓰면 되는데
+              categories를 붙이고 거기서 brand를 찾다가 실행 오류가 났습니다.
+            </span>
           </p>
         </Segment>
 

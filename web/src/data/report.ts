@@ -45,6 +45,27 @@ export const korean = {
   flipsV2: { fixed: 8, broken: 6, z: 0.5 }, // v1 → v2
 };
 
+// 외부 LLM 4곳(ChatGPT, Gemini, DeepSeek, Meta)이 쓴 쇼핑몰 질문. 정렬 동점은 --tie-aware로 채점.
+// 값은 맞힌 문항 수 (scripts/report_external.py 출력, README 표와 같은 값)
+export const external = {
+  total: 118,
+  overall: { base: 87, ft: 72, ft2: 73 },
+  bySource: [
+    { source: "ChatGPT", n: 30, base: 23, ft: 18, ft2: 18 },
+    { source: "Gemini", n: 30, base: 21, ft: 18, ft2: 21 },
+    { source: "DeepSeek", n: 29, base: 27, ft: 20, ft2: 20 },
+    { source: "Meta", n: 29, base: 16, ft: 16, ft2: 14 },
+  ],
+  byJoins: [
+    { joins: "0개", n: 59, base: 53, ft: 51, ft2: 48 },
+    { joins: "1개", n: 18, base: 15, ft: 14, ft2: 11 },
+    { joins: "2개 이상", n: 41, base: 19, ft: 7, ft2: 14 },
+  ],
+  flips: { fixed: 5, broken: 20, z: -3.0 }, // 베이스라인 → v1
+  flipsV2Multi: { fixed: 10, broken: 3 }, // v1 → v2, JOIN 2개 이상
+  flipsV2Few: { fixed: 3, broken: 9 }, // v1 → v2, JOIN 0~1개
+};
+
 export const v2Data = {
   dbs: "도서관 · 병원 · 학원 · 여행사 (쇼핑몰과 겹치지 않게 전자상거래 제외)",
   examples: 940,
