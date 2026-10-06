@@ -1,4 +1,4 @@
-export type ModelKey = "base" | "ft" | "ft2";
+export type ModelKey = "base" | "ft" | "ft2" | "ft3";
 
 export type Health = {
   ollama: boolean;

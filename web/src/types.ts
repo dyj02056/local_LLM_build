@@ -21,6 +21,7 @@ export const MODEL_LABEL: Record<ModelKey, string> = {
   base: "베이스라인",
   ft: "파인튜닝 v1",
   ft2: "파인튜닝 v2",
+  ft3: "파인튜닝 v3",
 };
 
-export const MODEL_KEYS: ModelKey[] = ["base", "ft", "ft2"];
+export const MODEL_KEYS: ModelKey[] = ["base", "ft", "ft2", "ft3"];

@@ -60,7 +60,7 @@ export function OutputTray({ jobs, dbLabel }: { jobs: Job[]; dbLabel: (id: strin
             시간이 영수증으로 나옵니다.
           </p>
           <p className="max-w-[52ch] leading-relaxed text-counter-mute">
-            '모두 비교'를 고르면 베이스라인, 파인튜닝 v1, v2의 영수증이 차례로 인쇄되고 결과가 같은지 표시됩니다.
+            '모두 비교'를 고르면 베이스라인, 파인튜닝 v1, v2, v3의 영수증이 차례로 인쇄되고 결과가 같은지 표시됩니다.
           </p>
         </div>
       ) : (

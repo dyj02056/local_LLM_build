@@ -10,9 +10,9 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-MODELS = {"base": "베이스라인", "ft": "파인튜닝 v1", "ft2": "파인튜닝 v2"}
-EXT = {"base": "ext-base-3b", "ft": "ext-ft-3b", "ft2": "ext-ft-v2"}
-OWN = {"base": "ko-base-3b", "ft": "ko-ft-3b", "ft2": "ko-ft-v2"}
+MODELS = {"base": "베이스라인", "ft": "파인튜닝 v1", "ft2": "파인튜닝 v2", "ft3": "파인튜닝 v3"}
+EXT = {"base": "ext-base-3b", "ft": "ext-ft-3b", "ft2": "ext-ft-v2", "ft3": "ext-ft-v3"}
+OWN = {"base": "ko-base-3b", "ft": "ko-ft-3b", "ft2": "ko-ft-v2", "ft3": "ko-ft-v3"}
 SOURCE_NAME = {"chatgpt": "ChatGPT", "gemini": "Gemini", "deepseek": "DeepSeek", "meta": "Meta"}
 
 
@@ -72,7 +72,7 @@ def main():
     out += table("외부 질문: 정답 SQL의 JOIN 수별", {k: by_join[k] for k in ["0개", "1개", "2개 이상"] if by_join[k]}, ext)
 
     out += ["### 문제별 변화 (외부 질문)", ""]
-    for a, b in [("base", "ft"), ("ft", "ft2"), ("base", "ft2")]:
+    for a, b in [("base", "ft"), ("ft", "ft2"), ("base", "ft2"), ("ft2", "ft3"), ("ft", "ft3"), ("base", "ft3")]:
         up, down, z = flips(ext[a], ext[b])
         out.append(f"- {MODELS[a]} → {MODELS[b]}: 새로 맞음 {up}, 새로 틀림 {down}, 부호 검정 z ≈ {z:.1f}")
     out.append("")

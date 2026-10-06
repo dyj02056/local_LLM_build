@@ -21,15 +21,16 @@ def main():
 
     # 한국어 질문 100개 + 두 모델의 채점 결과
     questions = json.loads(Path("data/korean/questions.json").read_text(encoding="utf-8"))
-    tags = {"base": "ko-base-3b", "ft": "ko-ft-3b", "ft2": "ko-ft-v2"}
+    tags = {"base": "ko-base-3b", "ft": "ko-ft-3b", "ft2": "ko-ft-v2", "ft3": "ko-ft-v3"}
     results = {k: {r["question"]: r["correct"] for r in load_eval(t)}
                for k, t in tags.items() if Path(f"outputs/preds_{t}_eval.jsonl").exists()}
     catalog = [{"id": q["id"], "level": q["level"], "question": q["question"],
                 **{k: res[q["question"]] for k, res in results.items()}} for q in questions]
     (OUT / "korean_catalog.json").write_text(json.dumps(catalog, ensure_ascii=False, indent=1), encoding="utf-8")
 
-    # 학습 Loss (v1, v2)
-    for src, dst in [("loss_table.txt", "loss.json"), ("loss_table_v2.txt", "loss_v2.json")]:
+    # 학습 Loss (v1, v2, v3)
+    for src, dst in [("loss_table.txt", "loss.json"), ("loss_table_v2.txt", "loss_v2.json"),
+                     ("loss_table_v3.txt", "loss_v3.json")]:
         path = Path("loss_table") / src
         if not path.exists():
             continue

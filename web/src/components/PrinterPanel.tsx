@@ -23,6 +23,7 @@ const MODES: { id: Mode; label: string; hint: string }[] = [
   { id: "base", label: MODEL_LABEL.base, hint: "파인튜닝 전" },
   { id: "ft", label: MODEL_LABEL.ft, hint: "Spider" },
   { id: "ft2", label: MODEL_LABEL.ft2, hint: "Spider+한국어" },
+  { id: "ft3", label: MODEL_LABEL.ft3, hint: "JOIN 균형" },
   { id: "compare", label: "모두 비교", hint: "설치된 모델 전부" },
 ];
 

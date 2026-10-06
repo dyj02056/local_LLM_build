@@ -35,7 +35,7 @@ def moving_avg(xs: list[float], k: int) -> list[float]:
     return [sum(xs[max(0, i - k + 1): i + 1]) / len(xs[max(0, i - k + 1): i + 1]) for i in range(len(xs))]
 
 
-SERIES = ["#2a78d6", "#eb6834"]  # 학습 실행별 색 (고정 순서)
+SERIES = ["#2a78d6", "#eb6834", "#1f9e6e"]  # 학습 실행별 색 (고정 순서)
 
 
 def plot_compare(logs, labels, out, window):

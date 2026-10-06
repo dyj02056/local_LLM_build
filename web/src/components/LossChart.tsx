@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import lossV1 from "../data/loss.json";
 import lossV2 from "../data/loss_v2.json";
+import lossV3 from "../data/loss_v3.json";
 
 const W = 640;
 const H = 240;
@@ -17,10 +18,11 @@ function smoothOf(points: [number, number][]) {
   });
 }
 
-// 두 실행은 색이 아니라 선 모양으로 구분한다 (실선 = v1, 점선 = v2)
+// 실행은 색이 아니라 선 모양으로 구분한다 (실선 = v1, 긴 점선 = v2, 짧은 점선 = v3)
 const RUNS: Run[] = [
   { id: "v1", label: "v1 Spider", points: lossV1 as [number, number][], smooth: [] },
   { id: "v2", label: "v2 Spider+한국어", points: lossV2 as [number, number][], smooth: [], dash: "5 4" },
+  { id: "v3", label: "v3 JOIN 균형", points: lossV3 as [number, number][], smooth: [], dash: "1.5 3" },
 ].map((r) => ({ ...r, smooth: smoothOf(r.points) }));
 
 const maxStep = Math.max(...RUNS.map((r) => r.points[r.points.length - 1][0]));

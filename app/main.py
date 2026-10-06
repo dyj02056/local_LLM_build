@@ -10,6 +10,7 @@
     BASE_MODEL      베이스라인 모델 (기본 qwen2.5-coder:3b)
     FT_MODEL        파인튜닝 v1 모델 (기본 text2sql-ft, Spider만 학습)
     FT2_MODEL       파인튜닝 v2 모델 (기본 text2sql-ft-v2, Spider + 한국어 다중 JOIN 학습)
+    FT3_MODEL       파인튜닝 v3 모델 (기본 text2sql-ft-v3, Spider + JOIN 수 균형 맞춘 한국어)
     OLLAMA_URL
 """
 
@@ -41,6 +42,7 @@ MODELS = {
     "base": os.environ.get("BASE_MODEL", "qwen2.5-coder:3b"),
     "ft": os.environ.get("FT_MODEL", "text2sql-ft"),
     "ft2": os.environ.get("FT2_MODEL", "text2sql-ft-v2"),
+    "ft3": os.environ.get("FT3_MODEL", "text2sql-ft-v3"),
 }
 MAX_ROWS = 200
 _DB_ID_RE = re.compile(r"^[A-Za-z0-9_]+$")
@@ -77,7 +79,7 @@ def _resolve_db(db_id: str) -> Path:
 class QueryRequest(BaseModel):
     db_id: str
     question: str = Field(min_length=1, max_length=1000)
-    model: Literal["base", "ft", "ft2"] = "ft"
+    model: Literal["base", "ft", "ft2", "ft3"] = "ft"
     self_correct: bool = False
 
 

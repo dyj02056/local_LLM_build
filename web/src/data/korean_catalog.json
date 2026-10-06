@@ -204,7 +204,7 @@
   "level": "어려움",
   "question": "리뷰를 쓴 적도 있고 주문을 취소한 적도 있는 고객은 몇 명인가요?",
   "base": true,
-  "ft": true,
+  "ft": false,
   "ft2": true
  },
  {
@@ -373,7 +373,7 @@
   "question": "상품이 5개 이상인 카테고리의 이름은?",
   "base": true,
   "ft": true,
-  "ft2": true
+  "ft2": false
  },
  {
   "id": 48,
@@ -436,7 +436,7 @@
   "level": "보통",
   "question": "모든 상품의 이름과 그 상품이 속한 카테고리 이름을 보여 줘.",
   "base": true,
-  "ft": false,
+  "ft": true,
   "ft2": false
  },
  {
@@ -572,8 +572,8 @@
   "level": "어려움",
   "question": "결제 수단별 취소율(취소 건수 ÷ 전체 주문 건수)을 0과 1 사이 값으로 구해 줘.",
   "base": true,
-  "ft": false,
-  "ft2": true
+  "ft": true,
+  "ft2": false
  },
  {
   "id": 73,
@@ -685,7 +685,7 @@
   "question": "전자제품과 가구를 둘 다 주문한 적이 있는 고객은 몇 명이야?",
   "base": false,
   "ft": false,
-  "ft2": false
+  "ft2": true
  },
  {
   "id": 87,
@@ -755,7 +755,7 @@
   "id": 95,
   "level": "어려움",
   "question": "소리샘 브랜드 상품을 산 적이 있는 고객 수를 도시별로 알려 줘.",
-  "base": true,
+  "base": false,
   "ft": false,
   "ft2": false
  },
