@@ -154,6 +154,7 @@ python scripts/compare.py outputs/preds_ext-ft-v2_eval.jsonl outputs/preds_ext-f
 | 예시 행 + 학습 | 예시 행이 베이스라인에 +3.9%p였으니, 학습 데이터도 `--sample-rows 3`으로 만들어 학습하는 실험을 해 볼 만함 (`data/sft_rows/train.jsonl`이 이미 생성돼 있음) |
 | 8 | Hugging Face 공개 (토큰은 사용자가 `huggingface-cli login`으로 직접) |
 | 10 | 프로젝트 종료 시 `scripts/cleanup.ps1` |
+| Kaggle 정리 | 4장을 마친 뒤 가능. **삭제 전 확인**: v3 GGUF가 `models/v3/`에, LoRA가 Drive `text2sql/v3/`에 있는지, Version 1·3 로그를 `outputs/kaggle_v3_try1.log`, `kaggle_v3.log`로 저장했는지. Dataset `text2sql-train-v3`는 로컬에서 똑같이 다시 만들 수 있어 언제 지워도 됨. v4를 할 거라면 **노트북은 남겨 두기** (GPU·인터넷·Input 설정 재사용) |
 
 ---
 
