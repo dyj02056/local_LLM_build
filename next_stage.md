@@ -2,28 +2,38 @@
 
 > 다른 컴퓨터나 새 채팅에서 이 프로젝트를 이어서 작업하기 위한 문서입니다.
 > 사람이 읽어도, AI 코딩 도우미(Claude Code 등)에게 그대로 건네도 이해할 수 있게 썼습니다.
-> 작성 시점: 2026-10-07 오전. 마지막 커밋 `712302d Create loss_table_v3.txt`.
-> 커밋 안 된 변경: `train/finetune_kaggle.py`, `train/finetune_kaggle.ipynb` (nan 대응 수정, 아래 4장 참고)
+> 작성 시점: 2026-10-07 낮 12시 반. v3 평가와 반영까지 끝난 상태입니다 (커밋은 사용자가 직접, 4-0 참고).
 
 ---
 
 ## 0. 한 줄 요약
 
-로컬 3B 모델(Qwen2.5-Coder-3B)을 QLoRA로 파인튜닝한 Text-to-SQL 포트폴리오입니다. **v3 학습(JOIN 필요·불필요 균형)이 Kaggle에서 방금 정상 완료**됐습니다. 남은 핵심 과제는 **v3 결과물을 받아 평가하고 README와 화면에 반영하는 것**입니다.
+로컬 3B 모델(Qwen2.5-Coder-3B)을 QLoRA로 파인튜닝한 Text-to-SQL 포트폴리오입니다. **v3(JOIN 필요·불필요 균형)를 평가해 README와 화면에 반영했습니다.** 외부 질문 61.0% → 69.5%로 v1·v2의 시소에서 벗어났지만 베이스라인(73.7%)은 아직 못 넘었습니다. 다음 후보는 **베이스라인 + 예시 행의 한국어 측정**, 그 결과에 따라 **v4(예시 행 포함 학습)** 입니다 (4장).
 
 ---
 
 ## 1. 지금까지의 결과 (숫자는 모두 실측)
 
-| 평가 | 베이스라인 | v1 (Spider 학습) | v2 (+한국어 다중 JOIN) | v3 |
+| 평가 | 베이스라인 | v1 (Spider 학습) | v2 (+한국어 다중 JOIN) | v3 (+JOIN 균형) |
 |---|---|---|---|---|
-| Spider dev 1,034문제 (영어) | 61.8% | **73.4%** | 73.1% | 평가 전 |
-| 직접 만든 한국어 쇼핑몰 100문제 | **71%** | 66% | 68% | 평가 전 |
-| └ JOIN 2개 이상 (14문제) | **9** | 2 | 4 | 평가 전 |
-| 외부 LLM 4곳이 만든 한국어 118문항 | **73.7%** | 61.0% | 61.9% | 평가 전 |
-| └ JOIN 0개 (59) | **90%** | 86% | 81% | 평가 전 |
-| └ JOIN 1개 (18) | **83%** | 78% | 61% | 평가 전 |
-| └ JOIN 2개 이상 (41) | **46%** | 17% | 34% | 평가 전 |
+| Spider dev 1,034문제 (영어) | 61.8% | **73.4%** | 71.9%† | 72.1%† |
+| 직접 만든 한국어 쇼핑몰 100문제 | **70%** | 67% | 67% | 67% |
+| └ JOIN 2개 이상 (14문제) | **8** | 2 | 5 | 4 |
+| 외부 LLM 4곳이 만든 한국어 118문항 | **73.7%** | 61.0% | 61.0% | 69.5% |
+| └ JOIN 0개 (59) | **90%** | 86% | 81% | **90%** |
+| └ JOIN 1개 (18) | **94%** | 78% | 72% | 78% |
+| └ JOIN 2개 이상 (41) | **41%** | 17% | 27% | 37% |
+| └ SQL 오류율 | **8.5%** | 21.2% | 25.4% | 14.4% |
+
+**재측정 (2026-10-07)**: 한국어 두 평가는 네 모델을 모두 이 컴퓨터(Ollama 0.34.2)에서 다시 잰 값입니다. 처음 컴퓨터와 1~3문제씩 다릅니다 (예: 100문제 베이스라인 71→70, v1 66→67, v2 68→67). Spider는 베이스라인·v1이 처음 측정값이고, †는 이 컴퓨터 값입니다. v2 Spider가 73.1% → 71.9%로 바뀌어 **Spider도 환경에 따라 1%p 정도 흔들립니다.** README에 같은 메모가 있습니다.
+
+v3 판정 (4-3의 성공 기준):
+- 외부 JOIN 2개 이상 v2 이상 유지 ✅ (27 → 37%), JOIN 0·1개 v1 수준 회복 ✅ (90%, 78%), Spider 유지 ✅ (같은 PC에서 v2 71.9 → v3 72.1, 새로 맞음 54 / 새로 틀림 51)
+- v2 → v3 외부 질문: 새로 맞음 19 / 새로 틀림 9 (z ≈ 1.9). 베이스라인 → v3: 7 / 12 (z ≈ -1.1)
+- 직접 만든 100문제는 v1·v2·v3 모두 67%로 구분 안 됨
+- 학습 여부 확인 (`scripts/check_learned.py`, 30문제): v3 30 / v2 27 (실패본은 22 / 26)
+
+**지금 쓸 모델을 고른다면**: 한국어 실무 DB는 베이스라인, 영어·단순 DB는 v1(+자동수정), 파인튜닝 모델 중 한국어·영어를 함께 쓸 거라면 v3. v2는 v3로 대체됨.
 
 추가 실험 (학습 없음):
 
@@ -45,8 +55,9 @@
 | 2 | README 다듬기 (요약은 위로, 세부는 접기) | ✅ | `<details>` 9개 |
 | 3 | Docker 건강 검진 간격 | ✅ 설정 반영 | `docker-compose.yml` (30초, 시작할 때만 2초) |
 | 4 | **v3 학습 데이터** | ✅ | `scripts/gen_korean_train_v3.py` → `data/korean_train/train_ko_v3.jsonl` (1,000개) → `data/sft/train_v3.jsonl` (10,659개) |
-| 4 | **v3 학습** | ✅ **학습 완료, 다운로드·평가 전** | Kaggle 노트북 `v3_training` Version 3 |
-| 5 | 오류 수정 대화 학습 | 🟡 준비만 됨 | `scripts/gen_fix_dialogs.py`, Kaggle·Colab 코드의 `v4` 항목. **사용자 결정: v3(균형만)를 먼저 따로 평가한 뒤 v4로 진행** |
+| 4 | **v3 학습** | ✅ | Kaggle 노트북 `v3_training` Version 3 → `models/v3/`, Ollama `text2sql-ft-v3` |
+| 4 | **v3 평가·반영** | ✅ (2026-10-07) | README v3 항목, 화면 v3 버튼·열, `docs/loss_compare.png`, `structure_explanation.md` 6장 |
+| 5 | 오류 수정 대화 학습 | 🟡 준비만 됨 | `scripts/gen_fix_dialogs.py`, Kaggle·Colab 코드의 `v4` 항목. v3 평가 후 **예시 행 학습보다 후순위로 제안함** (4장) |
 | 6 | 스키마에 예시 행 3개 | ✅ | 위 1장 표, `outputs/compare_base_vs_rows.md` |
 | 7 | 7B 모델 실험 | ⬜ | 선택 작업 |
 | 8 | Hugging Face 공개 | 🟡 모델 카드 초안만 | `docs/huggingface_model_card.md` |
@@ -88,73 +99,52 @@ Colab 무료 사용량이 바닥나서 **Kaggle Notebooks**(주 약 30시간 GPU
 
 ### 4-0. 커밋 (사용자)
 
-nan 대응으로 고친 Kaggle 학습 코드가 아직 커밋 전입니다.
+v3 모델 키·Loss 그래프는 이미 커밋됐습니다 (`2a87159`). 남은 변경:
+
+| 분류 | 파일 |
+|---|---|
+| 문서 | `README.md`, `structure_explanation.md`, `next_stage.md` |
+| 화면 | `web/src/App.tsx`, `data/report.ts`, `data/korean_catalog.json`, `components/ZReport.tsx`, `PrinterPanel.tsx` |
+| 스크립트 | `scripts/check_learned.py` (새 파일) |
 
 ```bash
-git add train/finetune_kaggle.py train/finetune_kaggle.ipynb
-git commit -m "fix Kaggle training: disable padding-free, nan guard, test mode"
+git add -A
+git commit -m "v3 evaluation: JOIN-balanced model, re-measured Korean results"
 ```
 
-고친 내용: `padding_free=False`, 10단계마다 loss를 로그에 출력하는 `Monitor` 콜백, nan이 나오면 즉시 중단하고 저장하지 않음, `TEST_STEPS`(앞부분만 시험 실행), 버전 출력.
-노트북 파일 `.ipynb`는 `.py`를 셀(`# %%`) 단위로 나눠 만든 것입니다. `.py`를 고치면 같은 방식으로 `.ipynb`도 다시 만들어야 합니다.
+`git status`로 `outputs/`나 `models/*.gguf`가 섞이지 않았는지 먼저 확인하세요 (둘 다 `.gitignore` 대상이어야 함).
 
-### 4-1. v3 결과물 다운로드 (사용자)
+### 4-1. 남은 보관 작업 (사용자)
 
-Kaggle → 노트북 `v3_training` → **Version 3** → **Output** 탭 (Version 1 Output은 실패한 학습이니 받지 마세요)
+- v3 `lora_adapter/` (약 130MB)를 Google Drive `text2sql/v3/`에 올렸는지 확인 (HF 공개와 GGUF 재생성에 필요)
+- Kaggle Version 1·3 로그를 `outputs/kaggle_v3_try1.log`, `kaggle_v3.log`로 저장 (Kaggle 정리 전에)
 
-| 받을 파일 | 둘 곳 | 비고 |
-|---|---|---|
-| `v3/gguf_out/Qwen2.5-Coder-3B-Instruct.Q4_K_M.gguf` (1.93GB) | `models/v3/` (같은 이름) | 필수 |
-| `v3/loss_table.txt` | `loss_table/loss_table_v3.txt`로 **덮어쓰기** | ⚠️ 지금 커밋된 `loss_table_v3.txt`는 **1차 실패본(nan 125줄)** 입니다. 반드시 바꾸고 다시 커밋하세요 |
-| `v3/lora_adapter/` (약 130MB) | Google Drive `text2sql/v3/` | 보관용 (HF 공개, GGUF 재생성에 필요) |
+### 4-2. 베이스라인 + 예시 행으로 한국어 측정 (AI, 약 30분, 학습 없음) ← 추천 다음 단계
 
-- 실패본 v3 GGUF와 Ollama `text2sql-ft-v3` 모델은 이미 지웠습니다. 지금 `models/v3/`에는 `Modelfile`만 있어요.
-- AI가 Kaggle을 확인하려면 앱의 Browser 패널에 사용자가 직접 로그인해야 합니다 (패널을 다시 열면 로그인이 풀리기도 함). 실행 중 로그는 Version History → `⋯` → **View logs**에 있습니다.
+예시 행 3개는 Spider 베이스라인을 61.8% → 65.7%로 올렸지만 **한국어 평가에는 아직 적용해 본 적이 없습니다.** 한국어에서 베이스라인이 가장 강하므로, 여기에 예시 행을 더하면 "지금 쓸 모델"이 바뀔 수 있습니다.
 
-### 4-2. 등록과 학습 여부 확인 (AI, 10분)
+- 할 일: `prepare_korean.py`, `prepare_external.py`에 `prepare_spider.py`와 같은 `--sample-rows` 옵션 추가 (`get_schema(db_path, n)` 재사용) → `dev_ko_rows.jsonl`, `dev_ext_rows.jsonl` 생성
+- 측정: `predict.py --model qwen2.5-coder:3b --tag ko-base-3b-rows` / `ext-base-3b-rows`, 외부는 `evaluate.py --tie-aware`
+- 비교: `compare.py outputs/preds_ext-base-3b_eval.jsonl outputs/preds_ext-base-3b-rows_eval.jsonl`
+- 파인튜닝 모델에는 적용하지 않습니다 (학습 때와 다른 프롬프트라 불공정).
 
-```bash
-python -c "import sys;L=open('loss_table/loss_table_v3.txt').read().split();print('nan' in L)"   # False여야 함
-ollama create text2sql-ft-v3 -f models/v3/Modelfile
-```
+### 4-3. v4 후보: 예시 행을 넣은 학습 (4-2 결과가 좋으면)
 
-**학습 여부 판별**: `data/korean_train/train_ko_v3.jsonl` 중 v2 학습 데이터(`train_ko.jsonl`)에 없는 질문(510개)에서 seed 0으로 30개를 뽑습니다. 이걸 `text2sql-ft-v3`와 `text2sql-ft-v2`에 temperature 0으로 묻고 실행 결과로 채점해요. 1차 실패본은 v3 22 / v2 26이었습니다. 제대로 학습됐다면 v3가 크게 앞서야 합니다 (스크립트는 저장하지 않았으니 새로 짜면 됩니다. 응답의 ```sql 블록을 벗겨 내고 SQLite로 실행해 정렬한 결과를 비교).
+- 데이터: v3 한국어 데이터에 예시 행을 붙인 버전 + `data/sft_rows/train.jsonl`(Spider, 이미 생성됨). `make_train_v2.py`와 `gen_korean_train_v3.py`에 `--sample-rows` 경로를 추가해야 함
+- 학습: Kaggle 노트북 `v3_training` 재사용, `RUN = "v4"`, 먼저 `TEST_STEPS = 150`
+- 확인: `scripts/check_learned.py --new-model text2sql-ft-v4 --old-model text2sql-ft-v3 ...`
+- 평가: 예시 행 프롬프트로 세 평가셋. 비교 대상은 **베이스라인 + 예시 행** (같은 조건)
+- 함께 고려: 학습률을 낮추거나 Spider 비중을 줄여 원래 모델의 감각을 덜 덮어쓰기, 다른 LLM으로 질문 말투를 다양하게 만들기
 
-### 4-3. 평가 (AI, 약 2시간 10분)
-
-```bash
-python scripts/predict.py --data data/korean/dev_ko.jsonl --model text2sql-ft-v3 --tag ko-ft-v3
-python scripts/evaluate.py outputs/preds_ko-ft-v3.jsonl --db-root data/korean/database
-python scripts/predict.py --data data/korean/dev_ext.jsonl --model text2sql-ft-v3 --tag ext-ft-v3
-python scripts/evaluate.py outputs/preds_ext-ft-v3.jsonl --db-root data/korean/database --tie-aware
-python scripts/predict.py --model text2sql-ft-v3 --tag ft-v3                  # Spider, 약 1시간 30분
-python scripts/evaluate.py outputs/preds_ft-v3.jsonl
-python scripts/compare.py outputs/preds_ft-v2_eval.jsonl outputs/preds_ft-v3_eval.jsonl
-python scripts/compare.py outputs/preds_ext-ft-v2_eval.jsonl outputs/preds_ext-ft-v3_eval.jsonl
-```
-
-- Windows 콘솔 한글 깨짐 방지: `PYTHONIOENCODING=utf-8` (Git Bash에서는 `export PYTHONIOENCODING=utf-8`)
-- 평가 중에는 Docker의 Ollama로 질문하지 마세요 (응답 시간 기록이 부풀려짐).
-
-**성공 기준**: 외부 118문항에서 JOIN 2개 이상은 v2 수준(34%) 이상을 유지하면서 JOIN 0개·1개는 v1 수준(86%, 78%)으로 회복. Spider는 73% 안팎 유지. 결과가 나쁘더라도 README에 그대로 기록합니다.
-
-### 4-4. 반영 (AI, 약 1시간)
-
-- `scripts/report_external.py`에 v3 추가
-- 화면: `web/src/data/report.ts` 숫자, `MODEL_KEYS`·`MODELS`, `web/src/api.ts`의 `ModelKey`, `app/main.py`의 `MODELS`. 이어서 `python scripts/export_demo_data.py`를 실행하고 `cd web && npx tsc --noEmit -p . && npm run build`
-- Loss 그래프: `export_demo_data.py`는 지금 `loss_table.txt`, `loss_table_v2.txt`만 읽으니 v3 추가. `docs/loss_compare.png`도 v3를 넣어 다시 그림 (`plot_loss.py`는 파일을 인자로 받음)
-- README: 결과표에 v3 열, "v3" 접기 항목 (데이터 설계, 결과, **3장의 Kaggle nan 경험**), 로드맵 체크, 실행 방법에 Kaggle 경로 추가
-- `docs/huggingface_model_card.md`: 결과에 따라 올릴 모델(v1/v2/v3)을 정함
-
-### 4-5. 그다음 후보
+### 4-4. 그다음 후보
 
 | 작업 | 내용 |
 |---|---|
-| v4 (작업 5) | `python scripts/gen_fix_dialogs.py` → `make_train_v2.py --korean data/korean_train/train_ko_v3.jsonl --extra data/korean_train/fix_dialogs.jsonl --out data/sft/train_v4.jsonl`. Kaggle 셀 2에서 `RUN = "v4"`, 먼저 `TEST_STEPS = 150`으로 시험. 평가: `scripts/self_correct.py --model text2sql-ft-v4 --src ft-v4 --tag ft-v4-sc`로 "같은 SQL 반복" 비율을 v1(40%)과 비교 |
-| 예시 행 + 학습 | 예시 행이 베이스라인에 +3.9%p였으니, 학습 데이터도 `--sample-rows 3`으로 만들어 학습하는 실험을 해 볼 만함 (`data/sft_rows/train.jsonl`이 이미 생성돼 있음) |
-| 8 | Hugging Face 공개 (토큰은 사용자가 `huggingface-cli login`으로 직접) |
+| 오류 수정 대화 학습 | `python scripts/gen_fix_dialogs.py` → `make_train_v2.py --korean data/korean_train/train_ko_v3.jsonl --extra data/korean_train/fix_dialogs.jsonl --out data/sft/train_v5.jsonl`. 자동수정 효과(+1%p)가 작아 예시 행 학습보다 후순위. 평가: `scripts/self_correct.py`로 "같은 SQL 반복" 비율을 v1(40%)과 비교 |
+| 7B 모델 | 선택. CPU 응답이 2배 이상 느려지고 프로젝트 주제(작은 모델)와 거리가 있음 |
+| 8 | Hugging Face 공개 (토큰은 사용자가 `huggingface-cli login`으로 직접). 올릴 모델: 한국어·영어를 함께 쓸 거라면 v3 |
 | 10 | 프로젝트 종료 시 `scripts/cleanup.ps1` |
-| Kaggle 정리 | 4장을 마친 뒤 가능. **삭제 전 확인**: v3 GGUF가 `models/v3/`에, LoRA가 Drive `text2sql/v3/`에 있는지, Version 1·3 로그를 `outputs/kaggle_v3_try1.log`, `kaggle_v3.log`로 저장했는지. Dataset `text2sql-train-v3`는 로컬에서 똑같이 다시 만들 수 있어 언제 지워도 됨. v4를 할 거라면 **노트북은 남겨 두기** (GPU·인터넷·Input 설정 재사용) |
+| Kaggle 정리 | **삭제 전 확인**: v3 GGUF가 `models/v3/`에(✅), LoRA가 Drive `text2sql/v3/`에, Version 1·3 로그 저장(4-1). Dataset `text2sql-train-v3`는 언제 지워도 됨. v4를 할 거라면 **노트북은 남겨 두기** |
 
 ---
 
@@ -190,11 +180,11 @@ Colab용 `train/finetune_unsloth.py`에는 nan 대응이 들어가 있지 않습
 
 | 태그 | 내용 |
 |---|---|
-| `base-3b`, `ft-3b`, `ft-v2` | Spider 1,034문제 (베이스라인, v1, v2) |
+| `ft-v2`, `ft-v3` | Spider 1,034문제 (v2·v3, 이 컴퓨터). `base-3b`, `ft-3b`와 예시 행·자동수정 결과는 **처음 컴퓨터에만 있음** |
 | `base-3b-rows` | Spider, 베이스라인 + 예시 행 3개 |
 | `base-3b-sc`, `ft-3b-sc`, `ft-3b-sc-hint`, `ft-3b-sc-hint-temp` | 자동수정 실험 |
-| `ko-base-3b`, `ko-ft-3b`, `ko-ft-v2` | 직접 만든 한국어 100문제 |
-| `ext-base-3b`, `ext-ft-3b`, `ext-ft-v2` | 외부 LLM 118문항 (`--tie-aware`) |
+| `ko-base-3b`, `ko-ft-3b`, `ko-ft-v2`, `ko-ft-v3` | 직접 만든 한국어 100문제 (네 모델 모두 이 컴퓨터) |
+| `ext-base-3b`, `ext-ft-3b`, `ext-ft-v2`, `ext-ft-v3` | 외부 LLM 118문항 (`--tie-aware`, 네 모델 모두 이 컴퓨터) |
 
 ### 6-2. 설치 순서 (Windows)
 
@@ -266,8 +256,8 @@ uvicorn app.main:app                     # http://localhost:8000
 | 비전공자용 설명, GGUF 재생성 방법 | `structure_explanation.md` |
 | 학습 코드 | `train/finetune_kaggle.py` / `.ipynb` (Kaggle, 현재 사용), `train/finetune_unsloth.py` (Colab) |
 | 학습 데이터 생성 | `scripts/gen_korean_train_v3.py`(v3), `gen_korean_train.py`(v2), `gen_fix_dialogs.py`(v4), `make_train_v2.py`(Spider와 합치기) |
-| 평가·비교 도구 | `scripts/predict.py`, `evaluate.py`, `compare.py`, `report_external.py`, `self_correct.py` |
-| Loss 기록 | `loss_table/loss_table.txt`(v1), `loss_table_v2.txt`, `loss_table_v3.txt`(**실패본, 교체 필요**) |
+| 평가·비교 도구 | `scripts/predict.py`, `evaluate.py`, `compare.py`, `report_external.py`, `self_correct.py`, `check_learned.py`(학습 여부 확인) |
+| Loss 기록 | `loss_table/loss_table.txt`(v1), `loss_table_v2.txt`, `loss_table_v3.txt`(2차 성공본, nan 0개) |
 | 한국어 평가 질문 | `data/korean/questions.json` (직접 100개), `questions_external.json` (외부 118개) |
 | 모델 카드 초안 | `docs/huggingface_model_card.md` |
 | 화면 코드 | `web/src/` (`components/Receipt.tsx`, `ZReport.tsx`, `data/report.ts`) |

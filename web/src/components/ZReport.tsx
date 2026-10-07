@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { external, korean, selfCorrection, spider, training, v2Data } from "../data/report";
+import { external, korean, selfCorrection, spider, training, v2Data, v3Data } from "../data/report";
 import { LossChart } from "./LossChart";
 
 /** 정산 테이프의 한 구역. 구역 사이는 이중선으로 끊는다. */
@@ -62,10 +62,10 @@ const th = "pb-2 pr-4 text-left font-bold whitespace-nowrap border-b-[1.5px] bor
 const td = "py-1.5 pr-4 whitespace-nowrap last:pr-0";
 const tdTotal = `${td} border-t-[1.5px] border-dashed border-ink/50`;
 
-type ModelCounts = { k: string; n: number; base: number; ft: number; ft2: number };
+type ModelCounts = { k: string; n: number; base: number; ft: number; ft2: number; ft3: number };
 
-/** 베이스라인 · v1 · v2 정답률 표. 값은 맞힌 문항 수, 표시는 %. total이 있으면 합계 줄을 붙인다. */
-function ThreeModelTable({ head, rows, total }: { head: string; rows: ModelCounts[]; total?: ModelCounts }) {
+/** 베이스라인 · v1 · v2 · v3 정답률 표. 값은 맞힌 문항 수, 표시는 %. total이 있으면 합계 줄을 붙인다. */
+function ModelTable({ head, rows, total }: { head: string; rows: ModelCounts[]; total?: ModelCounts }) {
   const p = (v: number, n: number) => Math.round((v / n) * 100);
   const totalPct = (v: number) => (total!.n === 100 ? `${v}%` : pct((v / total!.n) * 100));
   return (
@@ -78,18 +78,20 @@ function ThreeModelTable({ head, rows, total }: { head: string; rows: ModelCount
             <th className={`${th} text-right`}>베이스라인</th>
             <th className={`${th} text-right`}>v1</th>
             <th className={`${th} text-right`}>v2</th>
+            <th className={`${th} text-right`}>v3</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => {
             const worse = (v: number) => p(v, r.n) < p(r.base, r.n) - 10;
             return (
-              <tr key={r.k} className={worse(r.ft) || worse(r.ft2) ? "text-thermal" : ""}>
+              <tr key={r.k} className={worse(r.ft) || worse(r.ft2) || worse(r.ft3) ? "text-thermal" : ""}>
                 <td className={td}>{r.k}</td>
                 <td className={`${td} text-right text-ink-mute`}>{r.n}</td>
                 <td className={`${td} text-right`}>{p(r.base, r.n)}%</td>
                 <td className={`${td} text-right ${worse(r.ft) ? UNDERLINE : ""}`}>{p(r.ft, r.n)}%</td>
                 <td className={`${td} text-right ${worse(r.ft2) ? UNDERLINE : ""}`}>{p(r.ft2, r.n)}%</td>
+                <td className={`${td} text-right ${worse(r.ft3) ? UNDERLINE : ""}`}>{p(r.ft3, r.n)}%</td>
               </tr>
             );
           })}
@@ -100,6 +102,7 @@ function ThreeModelTable({ head, rows, total }: { head: string; rows: ModelCount
               <td className={`${tdTotal} text-right`}>{totalPct(total.base)}</td>
               <td className={`${tdTotal} text-right`}>{totalPct(total.ft)}</td>
               <td className={`${tdTotal} text-right`}>{totalPct(total.ft2)}</td>
+              <td className={`${tdTotal} text-right`}>{totalPct(total.ft3)}</td>
             </tr>
           )}
         </tbody>
@@ -115,11 +118,17 @@ function ZTape() {
     base: (external.overall.base / external.total) * 100,
     ft: (external.overall.ft / external.total) * 100,
     ft2: (external.overall.ft2 / external.total) * 100,
+    ft3: (external.overall.ft3 / external.total) * 100,
   };
   const [j0, j1, j2] = external.byJoins;
-  const extMulti = { base: `${j2.base}/${j2.n}`, ft: `${j2.ft}/${j2.n}`, ft2: `${j2.ft2}/${j2.n}` };
+  const extMulti = { base: `${j2.base}/${j2.n}`, ft: `${j2.ft}/${j2.n}`, ft2: `${j2.ft2}/${j2.n}`, ft3: `${j2.ft3}/${j2.n}` };
   const few = j0.n + j1.n;
-  const extFew = { base: `${j0.base + j1.base}/${few}`, ft: `${j0.ft + j1.ft}/${few}`, ft2: `${j0.ft2 + j1.ft2}/${few}` };
+  const extFew = {
+    base: `${j0.base + j1.base}/${few}`,
+    ft: `${j0.ft + j1.ft}/${few}`,
+    ft2: `${j0.ft2 + j1.ft2}/${few}`,
+    ft3: `${j0.ft3 + j1.ft3}/${few}`,
+  };
   const line = (k: string, v: ReactNode) => (
     <div className="leader">
       <span>{k}</span>
@@ -152,15 +161,21 @@ function ZTape() {
         <span className="dh">{delta(korean.overall.ft - korean.overall.base)}</span>
       </div>
       <div className="rule-dash my-3" />
-      <p className="text-ink-mute">v2: 한국어 다중 JOIN 940문제 추가 학습</p>
-      {line("한국어 정확도 (v1→v2)", `${korean.overall.ft}% → ${korean.overall.ft2}%`)}
-      {line("JOIN 2개 이상", `${korean.byJoins[2].ft}/14 → ${korean.byJoins[2].ft2}/14`)}
+      <p className="text-ink-mute">v2: 한국어 다중 JOIN 940문제 · v3: JOIN 수 균형 1,000문제</p>
+      {line("한국어 정확도 (v1→v2→v3)", `${korean.overall.ft}% → ${korean.overall.ft2}% → ${korean.overall.ft3}%`)}
+      {line("JOIN 2개 이상", `${korean.byJoins[2].ft}/14 → ${korean.byJoins[2].ft2}/14 → ${korean.byJoins[2].ft3}/14`)}
       {line("Spider (v1→v2)", `${pct(s2.ex)} → ${pct(spider.rows[4].ex)}`)}
+      {line("Spider (v2→v3, 같은 PC)", `${pct(spider.rows[5].ex)} → ${pct(spider.rows[6].ex)}`)}
       <div className="rule-dash my-3" />
-      <p className="text-ink-mute">외부 AI 질문 {external.total}문항 (베이스→v1→v2)</p>
-      {line("실행 정확도", [ext.base, ext.ft, ext.ft2].map((v) => `${Math.round(v)}%`).join(" → "))}
-      {line("JOIN 2개 이상", `${extMulti.base} → ${extMulti.ft} → ${extMulti.ft2}`)}
-      {line("JOIN 0~1개", `${extFew.base} → ${extFew.ft} → ${extFew.ft2}`)}
+      <p className="text-ink-mute">외부 AI 질문 {external.total}문항 (베이스→v1→v2→v3)</p>
+      {line("실행 정확도", [ext.base, ext.ft, ext.ft2, ext.ft3].map((v) => `${Math.round(v)}%`).join(" → "))}
+      {line("JOIN 2개 이상", `${extMulti.base} → ${extMulti.ft} → ${extMulti.ft2} → ${extMulti.ft3}`)}
+      {line("JOIN 0~1개", `${extFew.base} → ${extFew.ft} → ${extFew.ft2} → ${extFew.ft3}`)}
+      <div className="rule-double my-3" />
+      <div className="leader font-bold">
+        <span className="dh">v3 효과 (v2 대비)</span>
+        <span className="dh">{delta(ext.ft3 - ext.ft2)}</span>
+      </div>
       <div className="rule-dash my-3" />
       {line("자동수정 (Spider)", delta(spider.rows[3].ex - s2.ex))}
       {line("학습 Loss", `${training.lossStart.toFixed(3)} → ${training.lossEnd.toFixed(3)}`)}
@@ -257,14 +272,14 @@ export function ZReport() {
 
         <Segment
           title="한국어 쇼핑몰 100문제"
-          note="직접 만든 질문과 정답 SQL입니다. v1(Spider만 학습)은 여러 테이블을 이어야 하는 문제에서 무너졌고, 그 약점을 겨냥해 v2를 학습했습니다."
+          note="직접 만든 질문과 정답 SQL입니다. v1(Spider만 학습)은 여러 테이블을 이어야 하는 문제에서 무너졌고, 그 약점을 겨냥해 v2와 v3를 학습했습니다."
         >
-          <ThreeModelTable
+          <ModelTable
             head="난이도"
             rows={korean.byLevel.map((r) => ({ k: r.level, ...r }))}
             total={{ k: "전체", n: korean.total, ...korean.overall }}
           />
-          <ThreeModelTable head="정답 SQL의 JOIN 수" rows={korean.byJoins.map((r) => ({ k: r.joins, ...r }))} />
+          <ModelTable head="정답 SQL의 JOIN 수" rows={korean.byJoins.map((r) => ({ k: r.joins, ...r }))} />
           <p className="mt-3 text-[12px] text-ink-mute">빨간 밑줄: 베이스라인보다 10%p 넘게 낮음</p>
           <p className="mt-4 text-ink-mute">
             v1은 주문 → 주문상품 → 상품 → 카테고리처럼 긴 경로에서 중간 테이블을 건너뛰었습니다. Spider에서 불필요한 JOIN을
@@ -272,9 +287,16 @@ export function ZReport() {
           </p>
           <p className="mt-3 text-ink-mute">
             v2는 쇼핑몰과 겹치지 않는 DB 4개({v2Data.dbs.split(" (")[0]})로 만든 한국어 질문 {v2Data.examples}개(그중 JOIN 2개
-            이상 {v2Data.multiJoin}개)를 Spider와 섞어 다시 학습했습니다. JOIN 2개 이상 문제는 2개에서 4개로 늘었지만
-            베이스라인(9개)에는 크게 못 미쳤고, 어려움 난이도는 그대로입니다. v1 대비 새로 맞음 {korean.flipsV2.fixed}, 새로
-            틀림 {korean.flipsV2.broken}으로 우연과 구분되지 않는 차이입니다.
+            이상 {v2Data.multiJoin}개)를 Spider와 섞어 다시 학습했습니다. JOIN 2개 이상 문제는 {korean.byJoins[2].ft}개에서{" "}
+            {korean.byJoins[2].ft2}개로 늘었지만 베이스라인({korean.byJoins[2].base}개)에는 못 미쳤고, 어려움 난이도는 그대로입니다. v1 대비 새로 맞음 {korean.flipsV2.fixed}, 새로
+            틀림 {korean.flipsV2.broken}개로 우연과 구분되지 않는 차이입니다.
+          </p>
+          <p className="mt-3 text-ink-mute">
+            v3는 JOIN이 필요 없는 질문까지 균형 있게 섞어 학습했지만, 이 100문제에서는 v2 대비 새로 맞음 {korean.flipsV3.fixed}, 새로
+            틀림 {korean.flipsV3.broken}개로 차이가 없었습니다. 차이는 외부 질문에서 드러났습니다 (아래).
+          </p>
+          <p className="mt-3 text-[12px] text-ink-mute">
+            2026-10-07에 네 모델을 같은 컴퓨터에서 다시 쟀습니다. 처음 측정과 1~3문제씩 다를 수 있습니다.
           </p>
         </Segment>
 
@@ -282,16 +304,16 @@ export function ZReport() {
           title="외부 AI 질문 118문항"
           note="같은 사람이 만든 질문만으로 평가하면 말투 덕을 볼 수 있어서, ChatGPT · Gemini · DeepSeek · Meta가 같은 쇼핑몰 DB로 쓴 질문과 정답 SQL로 다시 채점했습니다. 정렬 동점이 있는 문항은 동점끼리 순서를 바꿔도 정답으로 봅니다."
         >
-          <ThreeModelTable
+          <ModelTable
             head="정답 SQL의 JOIN 수"
             rows={external.byJoins.map((r) => ({ k: r.joins, ...r }))}
             total={{ k: "전체", n: external.total, ...external.overall }}
           />
-          <ThreeModelTable head="질문을 쓴 AI" rows={external.bySource.map((r) => ({ k: r.source, ...r }))} />
+          <ModelTable head="질문을 쓴 AI" rows={external.bySource.map((r) => ({ k: r.source, ...r }))} />
           <p className="mt-3 text-[12px] text-ink-mute">빨간 밑줄: 베이스라인보다 10%p 넘게 낮음</p>
           <p className="mt-4 text-ink-mute">
-            말투 이점은 없었습니다. 베이스라인 대비 v1의 하락은 직접 만든 질문(-5%p)보다 외부 질문(-12.7%p)에서 더
-            컸습니다 (새로 맞음 {external.flips.fixed}, 새로 틀림 {external.flips.broken}, z ≈ {external.flips.z.toFixed(1)}).
+            말투 이점은 없었습니다. 베이스라인 대비 v1의 하락은 직접 만든 질문({korean.overall.ft - korean.overall.base}%p)보다 외부 질문(
+            {delta(((external.overall.ft - external.overall.base) / external.total) * 100)})에서 더 컸습니다 (새로 맞음 {external.flips.fixed}, 새로 틀림 {external.flips.broken}, z ≈ {external.flips.z.toFixed(1)}).
           </p>
           <p className="mt-3">
             <span className={UNDERLINE}>v1은 테이블을 너무 적게 잇고, v2는 너무 많이 잇습니다.</span>{" "}
@@ -302,11 +324,20 @@ export function ZReport() {
               categories를 붙이고 거기서 brand를 찾다가 실행 오류가 났습니다.
             </span>
           </p>
+          <p className="mt-3">
+            <span className={UNDERLINE}>v3는 둘 사이의 균형을 잡았습니다.</span>{" "}
+            <span className="text-ink-mute">
+              JOIN 수를 {v3Data.split} 비율로 맞춘 한국어 {v3Data.examples.toLocaleString()}개로 다시 학습했습니다. v2와 비교하면 JOIN
+              0~1개(새로 맞음 {external.flipsV3Few.fixed}, 새로 틀림 {external.flipsV3Few.broken})와 2개 이상(새로 맞음{" "}
+              {external.flipsV3Multi.fixed}, 새로 틀림 {external.flipsV3Multi.broken})이 함께 좋아졌고, SQL 오류율은{" "}
+              {external.errRate.ft2}%에서 {external.errRate.ft3}%로 줄었습니다. 다만 베이스라인에는 아직 못 미칩니다.
+            </span>
+          </p>
         </Segment>
 
         <Segment
           title="학습 Loss"
-          note={`v1: ${training.data} · v2: ${v2Data.mix} · ${training.setup}. v2의 Loss가 낮은 건 규칙적인 템플릿 데이터가 섞여서이고, 실력 차이를 뜻하지 않습니다.`}
+          note={`v1: ${training.data} · v2: ${v2Data.mix} · v3: ${v3Data.mix} (${v3Data.where}) · ${training.setup}. v2·v3의 Loss가 낮은 건 규칙적인 템플릿 데이터가 섞여서이고, 실력 차이를 뜻하지 않습니다.`}
         >
           <LossChart />
         </Segment>

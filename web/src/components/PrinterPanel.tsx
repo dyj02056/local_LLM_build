@@ -101,6 +101,8 @@ export function PrinterPanel(p: Props) {
               <label
                 key={m.id}
                 className={`relative flex cursor-pointer flex-col items-center rounded-[5px] px-1 py-2 text-center transition-colors duration-200 ${
+                  m.id === "compare" ? "col-span-full" : ""
+                } ${
                   active ? "bg-paper text-ink" : "text-counter-mute hover:bg-counter-3 hover:text-counter-ink"
                 }`}
               >

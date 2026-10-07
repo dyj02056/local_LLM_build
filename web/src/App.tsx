@@ -8,7 +8,7 @@ import { ZReport } from "./components/ZReport";
 import type { Job, Mode } from "./types";
 
 const MAX_JOBS = 12;
-const DEFAULT_NAMES: Record<ModelKey, string> = { base: "qwen2.5-coder:3b", ft: "text2sql-ft", ft2: "text2sql-ft-v2" };
+const DEFAULT_NAMES: Record<ModelKey, string> = { base: "qwen2.5-coder:3b", ft: "text2sql-ft", ft2: "text2sql-ft-v2", ft3: "text2sql-ft-v3" };
 
 function useHealth() {
   const [health, setHealth] = useState<Health | null>(null);
