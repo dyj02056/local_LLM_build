@@ -24,6 +24,7 @@ const MODES: { id: Mode; label: string; hint: string }[] = [
   { id: "ft", label: MODEL_LABEL.ft, hint: "Spider" },
   { id: "ft2", label: MODEL_LABEL.ft2, hint: "Spider+한국어" },
   { id: "ft3", label: MODEL_LABEL.ft3, hint: "JOIN 균형" },
+  { id: "vote", label: MODEL_LABEL.vote, hint: "5개 후보 · 약 5배 느림" },
   { id: "compare", label: "모두 비교", hint: "설치된 모델 전부" },
 ];
 
@@ -31,6 +32,10 @@ function modeUnavailable(m: Mode, health: Health | null): string | null {
   if (!health || !health.ollama) return null; // 연결 문제는 상태 띠에서 따로 알린다
   if (m === "compare") {
     return compareKeys(health).length < 2 ? "비교하려면 모델이 2개 이상 Ollama에 있어야 합니다" : null;
+  }
+  if (m === "vote") {
+    const missing = MODEL_KEYS.filter((k) => !health.models[k].installed).map((k) => health.models[k].name);
+    return missing.length ? `다수결에는 ${missing.join(", ")} 모델이 필요한데 Ollama에 없습니다` : null;
   }
   return health.models[m].installed ? null : `${health.models[m].name} 모델이 Ollama에 없습니다`;
 }
@@ -101,7 +106,7 @@ export function PrinterPanel(p: Props) {
               <label
                 key={m.id}
                 className={`relative flex cursor-pointer flex-col items-center rounded-[5px] px-1 py-2 text-center transition-colors duration-200 ${
-                  m.id === "compare" ? "col-span-full" : ""
+                  m.id === "compare" || m.id === "vote" ? "sm:col-span-2" : ""
                 } ${
                   active ? "bg-paper text-ink" : "text-counter-mute hover:bg-counter-3 hover:text-counter-ink"
                 }`}
@@ -121,6 +126,12 @@ export function PrinterPanel(p: Props) {
             );
           })}
         </div>
+        {p.mode === "vote" && !blocked && (
+          <p className="text-sm text-counter-mute">
+            베이스라인, v3, 베이스라인 + 예시 행, v2, v1이 쓴 SQL 5개를 실행해 결과 행이 같은 쪽이 가장 많은 SQL을 고릅니다. 동률이면
+            앞의 후보가 이깁니다. 모델을 5번 돌리므로 모델이 메모리에 올라 있어도 25~30초, 처음에는 모델을 올리느라 1~2분 걸립니다.
+          </p>
+        )}
         {blocked && <p className="text-sm text-thermal-soft">{blocked}. README의 등록 방법을 확인하세요.</p>}
       </fieldset>
 
@@ -131,22 +142,24 @@ export function PrinterPanel(p: Props) {
           </label>
           <p id={ids.scHelp} className="max-w-[46ch] text-sm text-counter-mute">
             SQL이 실행 오류를 내면 오류 메시지를 보여 주고 최대 2번 다시 쓰게 합니다. 정답은 보지 않습니다.
+            {p.mode === "vote" && " 다수결에서는 쓰지 않습니다."}
           </p>
         </div>
         <button
           id={ids.sc}
           type="button"
           role="switch"
-          aria-checked={p.selfCorrect}
+          aria-checked={p.selfCorrect && p.mode !== "vote"}
           aria-describedby={ids.scHelp}
+          disabled={p.mode === "vote"}
           onClick={() => p.onSelfCorrectChange(!p.selfCorrect)}
-          className={`relative mt-0.5 h-7 w-12 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ${
-            p.selfCorrect ? "border-paper bg-paper" : "border-counter-line bg-counter-2 hover:border-counter-mute"
+          className={`relative mt-0.5 h-7 w-12 shrink-0 cursor-pointer rounded-full border transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${
+            p.selfCorrect && p.mode !== "vote" ? "border-paper bg-paper" : "border-counter-line bg-counter-2 hover:border-counter-mute"
           }`}
         >
           <span
             className={`absolute top-1/2 left-1 size-5 -translate-y-1/2 rounded-full transition-transform duration-300 ease-out-expo ${
-              p.selfCorrect ? "translate-x-5 bg-ink" : "bg-counter-mute"
+              p.selfCorrect && p.mode !== "vote" ? "translate-x-5 bg-ink" : "bg-counter-mute"
             }`}
           />
         </button>

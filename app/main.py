@@ -33,6 +33,7 @@ from text2sql.executor import execute
 from text2sql.llm import OLLAMA_URL, chat
 from text2sql.prompt import build_messages, extract_sql
 from text2sql.schema import db_path_for, get_schema
+from text2sql.vote import result_key, vote
 
 ROOT = Path(__file__).resolve().parent.parent
 KOREAN_DB_ROOT = Path(os.environ.get("KOREAN_DB_ROOT", ROOT / "data/korean/database"))
@@ -44,6 +45,10 @@ MODELS = {
     "ft2": os.environ.get("FT2_MODEL", "text2sql-ft-v2"),
     "ft3": os.environ.get("FT3_MODEL", "text2sql-ft-v3"),
 }
+# 실행 결과 다수결 후보. README의 5개 다수결(vote5)과 같은 조합·순서이고, 동률이면 앞의 후보가 이긴다.
+# (모델 키, 예시 행 개수): 예시 행은 베이스라인에만 준다. 파인튜닝 모델은 학습 때와 같은 프롬프트만 받는다.
+VOTE_CANDIDATES = [("base", 0), ("ft3", 0), ("base", 3), ("ft2", 0), ("ft", 0)]
+VOTE_LABEL = {"base": "베이스라인", "ft": "파인튜닝 v1", "ft2": "파인튜닝 v2", "ft3": "파인튜닝 v3"}
 MAX_ROWS = 200
 _DB_ID_RE = re.compile(r"^[A-Za-z0-9_]+$")
 
@@ -79,13 +84,27 @@ def _resolve_db(db_id: str) -> Path:
 class QueryRequest(BaseModel):
     db_id: str
     question: str = Field(min_length=1, max_length=1000)
-    model: Literal["base", "ft", "ft2", "ft3"] = "ft"
-    self_correct: bool = False
+    model: Literal["base", "ft", "ft2", "ft3", "vote"] = "ft"
+    self_correct: bool = False  # 다수결(vote)에서는 무시한다
 
 
 class Attempt(BaseModel):
     sql: str
     error: str | None
+
+
+class VoteCandidate(BaseModel):
+    label: str
+    sql: str
+    error: str | None
+    group: int | None  # 같은 결과를 낸 후보끼리 같은 번호 (실행 오류면 None)
+    picked: bool
+
+
+class VoteInfo(BaseModel):
+    votes: int  # 고른 SQL과 같은 결과를 낸 후보 수
+    total: int
+    candidates: list[VoteCandidate]
 
 
 class QueryResponse(BaseModel):
@@ -98,6 +117,7 @@ class QueryResponse(BaseModel):
     attempts: list[Attempt]  # self-correction 이전 시도들 (첫 시도 포함, 최종 제외)
     generation_ms: int
     execution_ms: int
+    vote: VoteInfo | None = None
 
 
 @api.get("/health")
@@ -125,9 +145,58 @@ def schema(db_id: str):
     return {"db_id": db_id, "schema": get_schema(_resolve_db(db_id))}
 
 
+def _run_vote(question: str, db_path: Path) -> tuple[str, VoteInfo]:
+    """후보마다 SQL을 받아 실행 결과 다수결로 하나를 고른다. CPU 한 대라 차례로 돌린다."""
+    sqls, labels = [], []
+    for key, sample_rows in VOTE_CANDIDATES:
+        messages = build_messages(get_schema(db_path, sample_rows=sample_rows), question)
+        sqls.append(extract_sql(chat(messages, model=MODELS[key])))
+        labels.append(VOTE_LABEL[key] + (" + 예시 행" if sample_rows else ""))
+    result = vote(db_path, sqls)
+    group_of: dict = {}
+    candidates = []
+    for i, (label, sql) in enumerate(zip(labels, sqls)):
+        key = result_key(db_path, sql)
+        group = None if key is None else group_of.setdefault(key, len(group_of) + 1)
+        error = None if key is not None else run_error(db_path, sql)
+        candidates.append(VoteCandidate(label=label, sql=sql, error=error, group=group, picked=i == result.index))
+    return result.sql, VoteInfo(votes=result.votes, total=len(sqls), candidates=candidates)
+
+
+def _query_vote(req: QueryRequest, db_path: Path) -> QueryResponse:
+    t0 = time.perf_counter()
+    try:
+        sql, info = _run_vote(req.question, db_path)
+    except httpx.HTTPError as e:
+        raise HTTPException(502, f"LLM 서버에 연결할 수 없습니다: {e}")
+    t1 = time.perf_counter()
+
+    columns, rows, error = [], [], None
+    try:
+        columns, rows = execute(db_path, sql, timeout_s=5.0, max_rows=MAX_ROWS + 1)
+    except sqlite3.Error as e:
+        error = str(e)
+    t2 = time.perf_counter()
+
+    return QueryResponse(
+        model=f"다수결 ({info.total}개 후보)",
+        sql=sql,
+        columns=columns,
+        rows=[list(r) for r in rows[:MAX_ROWS]],
+        truncated=len(rows) > MAX_ROWS,
+        error=error,
+        attempts=[],
+        generation_ms=int((t1 - t0) * 1000),
+        execution_ms=int((t2 - t1) * 1000),
+        vote=info,
+    )
+
+
 @api.post("/query", response_model=QueryResponse)
 def query(req: QueryRequest):
     db_path = _resolve_db(req.db_id)
+    if req.model == "vote":
+        return _query_vote(req, db_path)
     model = MODELS[req.model]
     messages = build_messages(get_schema(db_path), req.question)
     chat_fn = partial(chat, model=model)

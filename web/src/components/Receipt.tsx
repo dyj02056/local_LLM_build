@@ -144,7 +144,7 @@ export function Receipt({ job, dbLabel }: { job: Job; dbLabel: string }) {
             </>
           }
         />
-        <Meta k="자동수정" v={job.selfCorrect ? "켜짐 (최대 2회)" : "꺼짐"} />
+        <Meta k="자동수정" v={job.modelKey === "vote" ? "해당 없음" : job.selfCorrect ? "켜짐 (최대 2회)" : "꺼짐"} />
         <Rule />
         <SectionLabel>질문</SectionLabel>
         <p className="break-words whitespace-pre-wrap">{job.question}</p>
@@ -154,7 +154,11 @@ export function Receipt({ job, dbLabel }: { job: Job; dbLabel: string }) {
       {(job.status === "queued" || job.status === "printing") && (
         <div className="space-y-2.5 py-1" role="status">
           <div className="flex items-center justify-between text-ink-mute">
-            <span>{job.status === "queued" ? "앞 영수증 인쇄를 기다리는 중" : "모델이 SQL을 쓰는 중"}</span>
+            <span>{job.status === "queued"
+                ? "앞 영수증 인쇄를 기다리는 중"
+                : job.modelKey === "vote"
+                  ? "5개 후보가 차례로 SQL을 쓰는 중"
+                  : "모델이 SQL을 쓰는 중"}</span>
             {job.status === "printing" && <Elapsed since={job.startedAt} className="text-ink" />}
           </div>
           <div className="pending-line w-full" />
@@ -195,6 +199,36 @@ export function Receipt({ job, dbLabel }: { job: Job; dbLabel: string }) {
             )}
             <Rule />
           </Printed>
+
+          {r.vote && (
+            <Printed i={section++}>
+              <div className="flex items-baseline justify-between">
+                <SectionLabel>후보 투표</SectionLabel>
+                <span className="text-ink-mute">
+                  {r.vote.votes > 0 ? `${r.vote.votes}/${r.vote.total}표` : "모두 실행 실패"}
+                </span>
+              </div>
+              <ol className="space-y-2">
+                {r.vote.candidates.map((c, i) => (
+                  <li key={i}>
+                    <div className="leader">
+                      <span className={c.picked ? "font-bold" : ""}>
+                        {c.picked ? "▶ " : ""}
+                        {c.label}
+                      </span>
+                      <span className={c.error ? "text-thermal" : "text-ink-mute"}>
+                        {c.group === null ? "오류" : `결과 ${String.fromCharCode(64 + c.group)}`}
+                      </span>
+                    </div>
+                    {c.picked ? null : <Sql sql={c.sql} voided={!!c.error} />}
+                    {c.error && <p className="text-thermal">{c.error}</p>}
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-2 text-ink-mute">같은 알파벳은 같은 결과 행을 냈다는 뜻입니다. 정답 여부는 알 수 없습니다.</p>
+              <Rule />
+            </Printed>
+          )}
 
           <Printed i={section++}>
             {r.error ? (

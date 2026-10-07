@@ -1,13 +1,13 @@
-import type { ModelKey, QueryResult } from "./api";
+import type { ModelKey, QueryResult, RunKey } from "./api";
 
-export type Mode = ModelKey | "compare";
+export type Mode = RunKey | "compare";
 
 export type Job = {
   id: number;
   no: number; // 영수증 번호
   pairId: number | null; // 비교 모드에서 같은 질문으로 묶인 두 장
   dbId: string;
-  modelKey: ModelKey;
+  modelKey: RunKey;
   modelName: string;
   question: string;
   selfCorrect: boolean;
@@ -17,11 +17,12 @@ export type Job = {
   failure?: string;
 };
 
-export const MODEL_LABEL: Record<ModelKey, string> = {
+export const MODEL_LABEL: Record<RunKey, string> = {
   base: "베이스라인",
   ft: "파인튜닝 v1",
   ft2: "파인튜닝 v2",
   ft3: "파인튜닝 v3",
+  vote: "다수결",
 };
 
 export const MODEL_KEYS: ModelKey[] = ["base", "ft", "ft2", "ft3"];

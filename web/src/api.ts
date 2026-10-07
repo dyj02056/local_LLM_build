@@ -1,4 +1,6 @@
 export type ModelKey = "base" | "ft" | "ft2" | "ft3";
+/** 모델 하나 또는 여러 모델의 실행 결과 다수결 */
+export type RunKey = ModelKey | "vote";
 
 export type Health = {
   ollama: boolean;
@@ -17,6 +19,11 @@ export type QueryResult = {
   attempts: { sql: string; error: string | null }[];
   generation_ms: number;
   execution_ms: number;
+  vote?: {
+    votes: number;
+    total: number;
+    candidates: { label: string; sql: string; error: string | null; group: number | null; picked: boolean }[];
+  } | null;
 };
 
 async function asJson<T>(res: Response): Promise<T> {
@@ -36,7 +43,7 @@ async function asJson<T>(res: Response): Promise<T> {
 export const getHealth = () => fetch("/api/health").then((r) => asJson<Health>(r));
 export const getDatabases = () => fetch("/api/databases").then((r) => asJson<Database[]>(r));
 
-export const runQuery = (body: { db_id: string; question: string; model: ModelKey; self_correct: boolean }) =>
+export const runQuery = (body: { db_id: string; question: string; model: RunKey; self_correct: boolean }) =>
   fetch("/api/query", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { external, korean, selfCorrection, spider, training, v2Data, v3Data } from "../data/report";
+import { external, korean, noTrain, selfCorrection, spider, training, v2Data, v3Data } from "../data/report";
 import { LossChart } from "./LossChart";
 
 /** 정산 테이프의 한 구역. 구역 사이는 이중선으로 끊는다. */
@@ -177,6 +177,11 @@ function ZTape() {
         <span className="dh">{delta(ext.ft3 - ext.ft2)}</span>
       </div>
       <div className="rule-dash my-3" />
+      <p className="text-ink-mute">학습 없이 올리기 (외부 질문 {external.total}문항)</p>
+      {line("7B 베이스라인", `${Math.round((noTrain.rows[2].ext / external.total) * 100)}%`)}
+      {line("3B 다수결 5개", `${Math.round((noTrain.rows[4].ext / external.total) * 100)}%`)}
+      {line("Spider v3 → 다수결 5개", `${pct(noTrain.rows[1].spider!)} → ${pct(noTrain.rows[4].spider!)}`)}
+      <div className="rule-dash my-3" />
       {line("자동수정 (Spider)", delta(spider.rows[3].ex - s2.ex))}
       {line("학습 Loss", `${training.lossStart.toFixed(3)} → ${training.lossEnd.toFixed(3)}`)}
       <div className="rule-dash my-3" />
@@ -332,6 +337,98 @@ export function ZReport() {
               {external.flipsV3Multi.fixed}, 새로 틀림 {external.flipsV3Multi.broken})이 함께 좋아졌고, SQL 오류율은{" "}
               {external.errRate.ft2}%에서 {external.errRate.ft3}%로 줄었습니다. 다만 베이스라인에는 아직 못 미칩니다.
             </span>
+          </p>
+        </Segment>
+
+        <Segment
+          title="학습 없이 올리기: 7B와 다수결"
+          note="학습을 더 하지 않고 모델 크기(3B → 7B)나 여러 답의 다수결로 정확도를 올릴 수 있는지 쟀습니다. 다수결은 모델마다 SQL을 쓰게 한 뒤 실행해서, 결과 행이 같은 SQL이 가장 많은 쪽을 고릅니다."
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className={th}>방식</th>
+                  <th className={`${th} text-right`}>Spider</th>
+                  <th className={`${th} text-right`}>한국어 100</th>
+                  <th className={`${th} text-right`}>외부 118</th>
+                </tr>
+              </thead>
+              <tbody>
+                {noTrain.rows.map((r) => {
+                  const bestSpider = Math.max(...noTrain.rows.map((x) => x.spider ?? 0));
+                  const bestKo = Math.max(...noTrain.rows.map((x) => x.ko));
+                  const bestExt = Math.max(...noTrain.rows.map((x) => x.ext));
+                  return (
+                    <tr key={r.label}>
+                      <td className={`${td} whitespace-normal`}>{r.label}</td>
+                      <td className={`${td} text-right ${r.spider === bestSpider ? UNDERLINE : ""} ${r.spider === null ? "text-ink-mute" : ""}`}>
+                        {r.spider === null ? "측정 안 함" : pct(r.spider)}
+                      </td>
+                      <td className={`${td} text-right ${r.ko === bestKo ? UNDERLINE : ""}`}>{r.ko}%</td>
+                      <td className={`${td} text-right ${r.ext === bestExt ? UNDERLINE : ""}`}>
+                        {pct((r.ext / external.total) * 100)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-[12px] text-ink-mute">
+            Spider 숫자는 v3만 이번에 새로 재고 나머지는 처음 컴퓨터 값이라 환경이 섞여 있습니다. 한국어 100문제와 외부 118문항의 7B ·
+            다수결 값은 다른 컴퓨터에서 쟀습니다. 1%p 안팎은 실력 차이로 보지 않습니다.
+          </p>
+
+          <p className="mt-5">
+            <span className={UNDERLINE}>한국어에서는 모델 크기가 학습을 이겼습니다.</span>{" "}
+            <span className="text-ink-mute">
+              7B 베이스라인은 외부 질문 {pct((noTrain.rows[2].ext / external.total) * 100)}로, 3B 베이스라인({pct((noTrain.rows[0].ext / external.total) * 100)})과 가장 잘
+              학습한 v3({pct((noTrain.rows[1].ext / external.total) * 100)})를 앞섭니다. 특히 JOIN 2개 이상 문항에서 {noTrain.sevenB.byJoins[2].b7}/
+              {noTrain.sevenB.byJoins[2].n}로 3B 베이스라인({noTrain.sevenB.byJoins[2].base}/{noTrain.sevenB.byJoins[2].n})의 거의 두 배이고, SQL 오류율은{" "}
+              {noTrain.sevenB.errRate.base}%에서 {noTrain.sevenB.errRate.b7}%로 줄었습니다. 대신 응답이 {noTrain.sevenB.lat.base}초에서{" "}
+              {noTrain.sevenB.lat.b7}초로 늘었습니다. JOIN 1개 문항만 17개에서 15개로 줄었습니다.
+            </span>
+          </p>
+
+          <p className="mt-6 mb-2 font-bold">Spider 5개 다수결: 고른 SQL을 몇 후보가 지지했나</p>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className={th}>같은 결과를 낸 후보</th>
+                  <th className={`${th} text-right`}>문제</th>
+                  <th className={`${th} text-right`}>다수결 정답</th>
+                  <th className={`${th} text-right`}>v3 혼자 정답</th>
+                </tr>
+              </thead>
+              <tbody>
+                {noTrain.voteBuckets.map((b) => (
+                  <tr key={b.votes} className={b.vote > b.v3 ? "" : b.vote < b.v3 ? "text-thermal" : ""}>
+                    <td className={td}>{b.votes === 0 ? "0표 (모두 실행 오류)" : `${b.votes}표`}</td>
+                    <td className={`${td} text-right text-ink-mute`}>{b.n}</td>
+                    <td className={`${td} text-right ${b.vote > b.v3 ? UNDERLINE : ""}`}>{b.vote}</td>
+                    <td className={`${td} text-right`}>{b.v3}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-[12px] text-ink-mute">밑줄: 다수결이 v3 혼자보다 많이 맞힘 · 빨강: 적게 맞힘</p>
+
+          <p className="mt-5">
+            <span className={UNDERLINE}>같은 모델의 변형을 섞으면 손해, 서로 다른 모델을 섞으면 이득이었습니다.</span>{" "}
+            <span className="text-ink-mute">
+              베이스라인 · v3 · 베이스라인 + 예시 행 3개 다수결은 v3 혼자({pct(noTrain.rows[1].spider!)})보다 낮은 {pct(noTrain.rows[3].spider!)}였습니다 (새로 맞음{" "}
+              {noTrain.flips3.fixed}, 새로 틀림 {noTrain.flips3.broken}). 베이스라인과 예시 행은 같은 모델이라 답이 비슷하고, 2표 싸움에서 둘이 한 편이 되어 더 강한 v3를
+              이겼기 때문입니다. v2 · v1을 더한 5개 다수결은 {pct(noTrain.rows[4].spider!)}로 v3보다 높고, 새로 맞음 {noTrain.flips5.fixed}, 새로 틀림{" "}
+              {noTrain.flips5.broken}(z ≈ {noTrain.flips5.z})입니다. 5개 중 하나라도 맞힌 문제는 {noTrain.oracle5}%라서 답을 고르는 방식을 더 다듬을 여지는 남아 있습니다.
+            </span>
+          </p>
+          <p className="mt-3 text-ink-mute">
+            대가는 시간입니다. 모델을 여러 번 돌리므로 평균 응답이 {noTrain.lat.v3}초(v3)에서 {noTrain.lat.vote3}초(3개), {noTrain.lat.vote5}초(5개)로 늘고, SQL 오류율은{" "}
+            {noTrain.err.v3}%에서 {noTrain.err.vote5}%로 줄었습니다. 후보 조합과 동률 우선순위는 Spider 결과를 보기 전에 정했습니다. 계산대의 '다수결' 모드가 이 조합을 그대로
+            씁니다.
           </p>
         </Segment>
 

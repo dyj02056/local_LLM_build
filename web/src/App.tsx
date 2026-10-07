@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { type Database, getDatabases, getHealth, type Health, type ModelKey, runQuery } from "./api";
+import { type Database, getDatabases, getHealth, type Health, type ModelKey, runQuery, type RunKey } from "./api";
 import { Catalog } from "./components/Catalog";
 import { OutputTray } from "./components/OutputTray";
 import { compareKeys, PrinterPanel } from "./components/PrinterPanel";
@@ -9,6 +9,7 @@ import type { Job, Mode } from "./types";
 
 const MAX_JOBS = 12;
 const DEFAULT_NAMES: Record<ModelKey, string> = { base: "qwen2.5-coder:3b", ft: "text2sql-ft", ft2: "text2sql-ft-v2", ft3: "text2sql-ft-v3" };
+const VOTE_NAME = "5개 후보 (베이스라인 · v3 · 예시 행 · v2 · v1)";
 
 function useHealth() {
   const [health, setHealth] = useState<Health | null>(null);
@@ -61,7 +62,7 @@ export default function App() {
   const last = jobs.find((j) => j.status === "done") ?? null;
 
   async function print() {
-    const keys: ModelKey[] = mode === "compare" ? compareKeys(health) : [mode];
+    const keys: RunKey[] = mode === "compare" ? compareKeys(health) : [mode];
     const now = Date.now();
     const pairId = keys.length > 1 ? now : null;
     const created: Job[] = keys.map((k, i) => ({
@@ -70,9 +71,9 @@ export default function App() {
       pairId,
       dbId,
       modelKey: k,
-      modelName: health?.models[k]?.name ?? DEFAULT_NAMES[k],
+      modelName: k === "vote" ? VOTE_NAME : (health?.models[k]?.name ?? DEFAULT_NAMES[k]),
       question: question.trim(),
-      selfCorrect,
+      selfCorrect: selfCorrect && k !== "vote",
       startedAt: now,
       status: i === 0 ? "printing" : "queued",
     }));

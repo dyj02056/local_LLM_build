@@ -66,3 +66,24 @@ def test_writes_are_blocked(client, monkeypatch):
     monkeypatch.setattr(main, "chat", chat_fn)
     body = client.post("/api/query", json={"db_id": "shop", "question": "q"}).json()
     assert body["error"] is not None
+
+
+def test_vote_picks_majority_result_and_reports_candidates(client, monkeypatch):
+    answers = [
+        "SELECT name FROM customer WHERE city = 'Seoul'",  # 베이스라인
+        "SELECT name FROM customer",  # v3: 다른 결과
+        "SELECT nam FROM customer",  # 베이스라인 + 예시 행: 실행 오류
+        "SELECT name FROM customer WHERE city = 'Seoul'",  # v2
+        "SELECT name FROM customer WHERE city = 'Seoul' ORDER BY name",  # v1: 같은 행 (순서 무시)
+    ]
+    chat_fn, calls = fake_chat(answers)
+    monkeypatch.setattr(main, "chat", chat_fn)
+    body = client.post("/api/query", json={"db_id": "shop", "question": "서울 고객", "model": "vote"}).json()
+    assert body["error"] is None and sorted(body["rows"]) == [["Kim"], ["Park"]]
+    assert calls == [main.MODELS[k] for k in ("base", "ft3", "base", "ft2", "ft")]
+    vote = body["vote"]
+    assert vote["votes"] == 3 and vote["total"] == 5
+    assert [c["group"] for c in vote["candidates"]] == [1, 2, None, 1, 1]
+    assert [c["picked"] for c in vote["candidates"]] == [True, False, False, False, False]
+    assert "no such column" in vote["candidates"][2]["error"]
+    assert vote["candidates"][2]["label"] == "베이스라인 + 예시 행"

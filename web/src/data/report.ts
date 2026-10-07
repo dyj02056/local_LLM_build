@@ -10,6 +10,7 @@ export const spider = {
     { label: "파인튜닝 v2 (+한국어)", ex: 73.1, err: 6.5, lat: 5.34 },
     { label: "파인튜닝 v2 재측정 (v3와 같은 PC)", ex: 71.9, err: 7.0, lat: 5.21 },
     { label: "파인튜닝 v3 (+JOIN 균형)", ex: 72.1, err: 6.6, lat: 5.31 },
+    { label: "파인튜닝 v3 (다른 PC에서 재측정)", ex: 71.9, err: 7.3, lat: 6.03 },
   ],
   flipsV2: { fixed: 51, broken: 54 }, // v1 → v2
   byType: [
@@ -93,4 +94,41 @@ export const training = {
   setup: "4bit QLoRA · r=16 · lr 2e-4 · Colab T4",
   lossStart: 0.404,
   lossEnd: 0.08,
+};
+
+// 학습 없이 정확도 올리기 (README "7B 베이스라인", "실행 결과 다수결").
+// 한국어 100문제·외부 118문항은 맞힌 문항 수. Spider는 %.
+// Spider 숫자는 한 컴퓨터에서 v3를 새로 재고(71.9%) 나머지 모델은 처음 컴퓨터 값을 섞어 계산했다.
+// 한국어·외부 질문의 7B와 다수결 값은 다른 컴퓨터에서 잰 값이다.
+export const noTrain = {
+  rows: [
+    { label: "3B 베이스라인", spider: 61.8, ko: 70, ext: 87, kind: "base" },
+    { label: "3B 파인튜닝 v3 (참고)", spider: 71.9, ko: 67, ext: 82, kind: "ft" },
+    { label: "7B 베이스라인", spider: null, ko: 79, ext: 102, kind: "7b" },
+    { label: "3B 다수결 3개 (베이스라인 · v3 · 예시 행)", spider: 70.6, ko: 76, ext: 90, kind: "vote" },
+    { label: "3B 다수결 5개 (+ v2 · v1)", spider: 75.3, ko: 78, ext: 95, kind: "vote" },
+  ] as { label: string; spider: number | null; ko: number; ext: number; kind: string }[],
+  sevenB: {
+    byJoins: [
+      { joins: "0개", n: 59, base: 53, b7: 55 },
+      { joins: "1개", n: 18, base: 17, b7: 15 },
+      { joins: "2개 이상", n: 41, base: 17, b7: 32 },
+    ],
+    errRate: { base: 8.5, b7: 0.8 },
+    lat: { base: 6.8, b7: 13.6 },
+  },
+  // Spider 5개 다수결: 고른 SQL과 같은 결과를 낸 후보 수별 문제 수와 정답 수
+  voteBuckets: [
+    { votes: 5, n: 598, vote: 540, v3: 540 },
+    { votes: 4, n: 121, vote: 82, v3: 67 },
+    { votes: 3, n: 184, vote: 109, v3: 111 },
+    { votes: 2, n: 87, vote: 37, v3: 22 },
+    { votes: 1, n: 30, vote: 11, v3: 3 },
+    { votes: 0, n: 14, vote: 0, v3: 0 },
+  ],
+  flips5: { fixed: 56, broken: 20, z: 4.1 }, // v3 → 5개 다수결 (Spider)
+  flips3: { fixed: 53, broken: 66 }, // v3 → 3개 다수결 (Spider)
+  oracle5: 83.8, // 5개 중 하나라도 맞힌 문제 비율 (Spider)
+  lat: { v3: 6.0, vote3: 17.2, vote5: 27.6 },
+  err: { v3: 7.3, vote3: 3.3, vote5: 1.4 },
 };
