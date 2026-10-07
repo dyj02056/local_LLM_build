@@ -119,7 +119,19 @@ git commit -m "v3 evaluation: JOIN-balanced model, re-measured Korean results"
 - v3 `lora_adapter/` (약 130MB)를 Google Drive `text2sql/v3/`에 올렸는지 확인 (HF 공개와 GGUF 재생성에 필요)
 - Kaggle Version 1·3 로그를 `outputs/kaggle_v3_try1.log`, `kaggle_v3.log`로 저장 (Kaggle 정리 전에)
 
-### 4-2. 베이스라인 + 예시 행으로 한국어 측정 (AI, 약 30분, 학습 없음) ← 추천 다음 단계
+### 4-2. 베이스라인 + 예시 행으로 한국어 측정 — ✅ 완료 (2026-10-07), 효과 없음
+
+| 평가 | 베이스라인 | + 예시 행 3개 | 새로 맞음 / 새로 틀림 |
+|---|---|---|---|
+| 직접 만든 100문제 | 70% | 68% | 1 / 3 |
+| 외부 118문항 | 73.7% | 74.6% | 6 / 5 |
+| └ JOIN 2개 이상 (41) | 17 | 20 | |
+
+- 둘 다 우연과 구분되지 않음. 쇼핑몰 스키마에는 이미 값 설명 주석(`-- '일반', '실버', ...`)이 있어서 예시 행이 새로 주는 정보가 적은 것으로 봄 (Spider에는 이런 주석이 거의 없어 +3.9%p였음)
+- README 예시 행 항목에 기록함. 결과 태그 `ko-base-3b-rows`, `ext-base-3b-rows`. 데이터 `data/korean/dev_ko_rows.jsonl`, `dev_ext_rows.jsonl`
+- **결론: 4-3(예시 행 학습)은 근거가 약해짐.** 다음 방향은 사용자와 다시 정할 것
+
+아래는 실행할 때 쓴 원래 계획입니다.
 
 예시 행 3개는 Spider 베이스라인을 61.8% → 65.7%로 올렸지만 **한국어 평가에는 아직 적용해 본 적이 없습니다.** 한국어에서 베이스라인이 가장 강하므로, 여기에 예시 행을 더하면 "지금 쓸 모델"이 바뀔 수 있습니다.
 
@@ -128,7 +140,7 @@ git commit -m "v3 evaluation: JOIN-balanced model, re-measured Korean results"
 - 비교: `compare.py outputs/preds_ext-base-3b_eval.jsonl outputs/preds_ext-base-3b-rows_eval.jsonl`
 - 파인튜닝 모델에는 적용하지 않습니다 (학습 때와 다른 프롬프트라 불공정).
 
-### 4-3. v4 후보: 예시 행을 넣은 학습 (4-2 결과가 좋으면)
+### 4-3. v4 후보: 예시 행을 넣은 학습 (4-2 결과가 좋으면 → 4-2에서 효과가 없어 보류)
 
 - 데이터: v3 한국어 데이터에 예시 행을 붙인 버전 + `data/sft_rows/train.jsonl`(Spider, 이미 생성됨). `make_train_v2.py`와 `gen_korean_train_v3.py`에 `--sample-rows` 경로를 추가해야 함
 - 학습: Kaggle 노트북 `v3_training` 재사용, `RUN = "v4"`, 먼저 `TEST_STEPS = 150`

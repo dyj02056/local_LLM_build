@@ -5,8 +5,10 @@
 
     python scripts/prepare_external.py
 결과: data/korean/questions_external.json (합친 문항), data/korean/dev_ext.jsonl (predict.py 입력)
+예시 행 포함: python scripts/prepare_external.py --sample-rows 3 --out data/korean/dev_ext_rows.jsonl
 """
 
+import argparse
 import json
 from pathlib import Path
 
@@ -40,8 +42,13 @@ FIXES = {
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default="data/korean/dev_ext.jsonl")
+    ap.add_argument("--sample-rows", type=int, default=0, help="스키마에 넣을 테이블별 예시 행 수")
+    args = ap.parse_args()
+
     db_path = db_path_for("data/korean/database", "shop")
-    schema = get_schema(db_path)
+    schema = get_schema(db_path, args.sample_rows)
     merged, excluded = [], []
     for src in SOURCES:
         for q in json.loads(Path(f"data/korean/questions_external_{src}.json").read_text(encoding="utf-8-sig")):
@@ -63,14 +70,14 @@ def main():
             })
 
     Path("data/korean/questions_external.json").write_text(json.dumps(merged, ensure_ascii=False, indent=1), encoding="utf-8")
-    with open("data/korean/dev_ext.jsonl", "w", encoding="utf-8") as f:
+    with open(args.out, "w", encoding="utf-8") as f:
         for q in merged:
             f.write(json.dumps({"db_id": "shop", "question": q["question"], "query": q["query"],
                                 "messages": build_messages(schema, q["question"], q["query"]),
                                 "id": q["id"], "level": q["level"], "source": q["source"]}, ensure_ascii=False) + "\n")
 
     print(f"{len(merged)}문항 (제외 {len(excluded)}, 수정 {sum(bool(q['edited']) for q in merged)}, "
-          f"정렬 동점 {sum(q['order_ties'] for q in merged)}) -> data/korean/questions_external.json, dev_ext.jsonl")
+          f"정렬 동점 {sum(q['order_ties'] for q in merged)}) -> data/korean/questions_external.json, {args.out}")
     for e in excluded:
         print("  제외:", e)
 

@@ -3,6 +3,7 @@
 사용법:
     python scripts/build_shop_db.py        # DB 먼저 생성
     python scripts/prepare_korean.py       # -> data/korean/dev_ko.jsonl
+    python scripts/prepare_korean.py --sample-rows 3 --out data/korean/dev_ko_rows.jsonl   # 예시 행 포함
 
 검증 항목 (문제가 있으면 경고 출력):
   - 정답 SQL 실행 오류
@@ -40,10 +41,11 @@ def main():
     ap.add_argument("--db-root", default="data/korean/database")
     ap.add_argument("--db-id", default="shop")
     ap.add_argument("--out", default="data/korean/dev_ko.jsonl")
+    ap.add_argument("--sample-rows", type=int, default=0, help="스키마에 넣을 테이블별 예시 행 수")
     args = ap.parse_args()
 
     db_path = db_path_for(args.db_root, args.db_id)
-    schema = get_schema(db_path)
+    schema = get_schema(db_path, args.sample_rows)
     questions = json.loads(Path(args.questions).read_text(encoding="utf-8"))
 
     n_warn = 0
